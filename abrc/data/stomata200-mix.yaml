@@ -1,0 +1,21 @@
+# ABRC 2023 dataset - stomata200-mix
+var:
+  dataset_dir: /mnt/linux/abrc/abrc/dataset
+  dataset_name: stomata200-mix
+
+# download command/URL (optional)
+# download: bash ./scripts/get_coco.sh
+
+# train and val data as 1) directory: path/images/, 2) file: path/images.txt, or 3) list: [path1/images/, path2/images/]
+# train: ../../google-drive/stomata200-mix/train.txt
+# val: ../../google-drive/stomata200-mix/val.txt
+# test: ../../google-drive/stomata200-mix/test.txt
+train: /mnt/linux/abrc/abrc/dataset/stomata200-mix/images/train/
+val: /mnt/linux/abrc/abrc/dataset/stomata200-mix/images/val/
+
+# number of classes
+nc: 1
+
+# class names
+# replace all class names list with your class names
+names: ["stomata"]
