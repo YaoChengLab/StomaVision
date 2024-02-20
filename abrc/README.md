@@ -1,6 +1,6 @@
 # Train Instance Segmentation with Yolov7
 
-To train **instance-segmentation\*\*** models with Yolov7 based on the pre-trained model, you must run the code under this branch or `u7`. Branch `main` and `mask` only consist of scripts for **object detection**. Below summarise the steps to run the code.
+To train **instance-segmentation** models with Yolov7 based on the pre-trained model, you must run the code under this branch or `u7`. Branch `main` and `mask` only consist of scripts for **object detection**. Below summaries the steps to run the code.
 
 ## Step 1: Install dependencies
 
