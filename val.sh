@@ -17,7 +17,7 @@ for d in $datas; do
         # Run validation (evaluation)
         python -m torch.distributed.run \
             --nproc_per_node 2 \
-            ../seg/segment/val.py \
+            seg/segment/val.py \
             --workers 16 \
             --device 0,1 \
             --batch-size 16 \

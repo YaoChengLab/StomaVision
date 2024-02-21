@@ -7,7 +7,7 @@ for h in $HYPS; do
     python -m torch.distributed.run \
         --nproc_per_node 4 \
         --master_port 9527 \
-        ../seg/segment/train.py \
+        seg/segment/train.py \
         --workers 8 \
         --device 0,1,2,3 \
         --batch-size $batch_size \
@@ -28,7 +28,7 @@ for h in $HYPS; do
     python -m torch.distributed.run \
         --nproc_per_node 4 \
         --master_port 9527 \
-        ../seg/segment/train.py \
+        seg/segment/train.py \
         --workers 8 \
         --device 0,1,2,3 \
         --batch-size $batch_size \
@@ -49,7 +49,7 @@ for h in $HYPS; do
     python -m torch.distributed.run \
         --nproc_per_node 4 \
         --master_port 9527 \
-        ../seg/segment/train.py \
+        seg/segment/train.py \
         --workers 8 \
         --device 0,1,2,3 \
         --batch-size $batch_size \

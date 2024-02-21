@@ -1,7 +1,7 @@
 # Finetune p5 models with multiple GPUs
 python -m torch.distributed.run \
     --nproc_per_node 2 \
-    ../seg/segment/train.py \
+    seg/segment/train.py \
     --workers 32 \
     --device 0,1 \
     --batch-size 16 \

@@ -16,7 +16,7 @@ for d in $datas; do
     for m in $models; do
         echo "******** inference $m on $d ***********"
         # Run inference
-        python ../seg/segment/predict-abrc-new.py \
+        python seg/segment/predict-abrc-new.py \
             --device cpu \
             --weights /mnt/linux/abrc/abrc/models/$m.pt \
             --conf 0.3 \
