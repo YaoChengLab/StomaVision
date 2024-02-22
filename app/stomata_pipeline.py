@@ -252,13 +252,11 @@ def infer_image(images_dict: dict, process_field=None):
 
     return responses
 
-print("before")
 global_config.set_default(
-    url="api.instill.tech",
+    url="localhost:8080",
     token=st.secrets["instill_api_key"],
-    secure=True,
+    secure=False,
 )
-print("after")
 
 st.set_page_config(layout="wide")
 
@@ -277,7 +275,7 @@ else:
 
 client = InstillClient()
 pipeline_service = client.pipeline_service
-stomata_pipeline = Pipeline(client=client, name="stomata-detection")
+stomata_pipeline = Pipeline(client=client, name=st.secrets["stomata_pipeline_name"])
 
 # input options
 input_option = st.sidebar.radio(
