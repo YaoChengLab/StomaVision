@@ -252,12 +252,13 @@ def infer_image(images_dict: dict, process_field=None):
 
     return responses
 
-
+print("before")
 global_config.set_default(
     url="api.instill.tech",
     token=st.secrets["instill_api_key"],
     secure=True,
 )
+print("after")
 
 st.set_page_config(layout="wide")
 

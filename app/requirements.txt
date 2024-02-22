@@ -1,4 +1,4 @@
-streamlit==1.29.0
+streamlit==1.31.1
 streamlit-image-select==0.6.0
 instill-sdk==0.7.1rc2
 opencv-python-headless==4.8.1.78
