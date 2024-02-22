@@ -72,8 +72,8 @@ def preprocess_and_render_layout(image_dict):
         col3.header("Stomata prediction metrics")
         for (file_name, orig_img), output in zip(image_dict.items(), outputs):
             col1, col2, col3 = st.columns(3)
-            predictions = output[0]["objects"]
-            predicted_image = output[0]["vis"]
+            predictions = output[0][st.secrets["stomata_pipeline_output_objects_key"]]
+            predicted_image = output[0][st.secrets["stomata_pipeline_output_visualization_key"]]
             predicted_image = np.array(
                 Image.open(io.BytesIO(base64.b64decode(predicted_image.split(",")[1])))
             )
@@ -233,7 +233,7 @@ def infer_image(images_dict: dict, process_field=None):
                 f"operation started for video frame: {idx}/{len(images_dict)}"
             )
         i = Struct()
-        i.update({"input": cv2_base64(img)})
+        i.update({st.secrets["stomata_pipeline_name"]: cv2_base64(img)})
         operation = stomata_pipeline.trigger_async([i])
         operations.append(operation)
 

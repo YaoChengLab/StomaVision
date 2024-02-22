@@ -18,9 +18,9 @@ RUN mkdir /stomavision/app/.streamlit
 
 WORKDIR /stomavision/app/.streamlit
 
-ARG API_TOKEN PIPELINE_NAME
+ARG API_TOKEN
 RUN bash -c 'echo "instill_api_key = \"$API_TOKEN\"" > secrets.toml'
-RUN bash -c 'echo "stomata_pipeline_name = \"$PIPELINE_NAME\"" >> secrets.toml'
+RUN bash -c 'cat config.toml >> secrets.toml'
 
 WORKDIR /stomavision/app
 
