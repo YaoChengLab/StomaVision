@@ -1,0 +1,10 @@
+# ABRC 2023 dataset
+path: /path/to/your/dataset
+train: images/train/
+val: images/val/
+test:
+
+# class names
+# replace all class names list with your class names
+names:
+  0: stomata
