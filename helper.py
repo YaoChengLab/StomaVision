@@ -229,5 +229,25 @@ def dilation_erosion_masks(masks, dilatation_size):
     return processed_masks
 
 
-#
-# Compute height and width from rotated box
+def calc_polygon_area(polygons):
+    r"""Calculate polygon area with shoelace formula
+
+    Args:
+     - polygons (list): is a list of polygon points [x1, y1, x2, y2,...]
+    """
+    areas = []
+    for p in polygons:
+        pts_x = p[::2]
+        pts_y = p[1::2]
+        pts = [[x, y] for x, y in zip(pts_x, pts_y)]
+        pts = np.array(pts, np.float32)
+        # shift coordinates
+        x_ = pts_x - np.mean(pts_x)
+        y_ = pts_y - np.mean(pts_y)
+        # calculate area
+        correction = x_[-1] * y_[0] - y_[-1] * x_[0]
+        main_area = np.dot(x_[:-1], y_[1:]) - np.dot(y_[:-1], x_[1:])
+        area = 0.5 * np.abs(main_area + correction)
+        areas.append(area)
+
+    return areas

@@ -2,16 +2,15 @@
 
 data=example
 
-python -m torch.distributed.run \
-    --nproc_per_node 2 \
-    seg/segment/train.py \
-    --workers 32 \
-    --device 0,1 \
-    --batch-size 16 \
+#python -m torch.distributed.run \
+python seg/segment/train.py \
+    --workers 6 \
+    --device cpu \
+    --batch-size 8 \
     --cfg cfg/training/yolov7-seg.yaml \
     --data data/$data.yaml \
     --img 640 \
-    --weights 'model/yolov7x-seg.pt' \
+    --weights 'model/yolov7-seg.pt' \
     --name yolov7-abrc-$data \
     --hyp hyp/hyp.scratch.abrc.yaml
 

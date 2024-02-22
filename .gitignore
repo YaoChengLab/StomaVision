@@ -5,10 +5,12 @@ inference_test_output
 
 
 *.png
+!/app/samples/*.png
 *.json
 *.diff
 *.jpg
 !/projects/DensePose/doc/images/*.jpg
+!/app/samples/*.jpg
 *.tif
 
 # compilation and distribution
@@ -55,7 +57,12 @@ _darcs
 /models
 /snippet
 
-#exp outputs
+# dataset
+dataset
+
+# exp outputs
 **/runs
 **/outputs
 
+# streamlit config
+.streamlit*
