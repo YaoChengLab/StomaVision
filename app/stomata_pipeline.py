@@ -34,8 +34,8 @@ def sample_input():
         label="Select a sample image to inference",
         use_container_width=False,
         images=[
-            "samples/c_tr_56_cut_want.jpg",
-            "samples/c_tr_68_cut_want.jpg",
+            "samples/c_tr_56.jpg",
+            "samples/c_tr_68.jpg",
             "samples/u_tr_26.png",
         ],
     )
