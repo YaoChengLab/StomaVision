@@ -233,7 +233,7 @@ def infer_image(images_dict: dict, process_field=None):
                 f"operation started for video frame: {idx}/{len(images_dict)}"
             )
         i = Struct()
-        i.update({st.secrets["stomata_pipeline_name"]: cv2_base64(img)})
+        i.update({st.secrets["stomata_pipeline_input_key"]: cv2_base64(img)})
         operation = stomata_pipeline.trigger_async([i])
         operations.append(operation)
 

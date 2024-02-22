@@ -16,11 +16,9 @@ RUN pip3 install -r app/requirements.txt
 
 RUN mkdir /stomavision/app/.streamlit
 
-WORKDIR /stomavision/app/.streamlit
-
 ARG API_TOKEN
-RUN bash -c 'echo "instill_api_key = \"$API_TOKEN\"" > secrets.toml'
-RUN bash -c 'cat config.toml >> secrets.toml'
+RUN bash -c 'echo "instill_api_key = \"$API_TOKEN\"" > app/.streamlit/secrets.toml'
+RUN bash -c 'cat app/config.toml >> app/.streamlit/secrets.toml'
 
 WORKDIR /stomavision/app
 
