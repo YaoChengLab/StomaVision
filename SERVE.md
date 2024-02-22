@@ -1,8 +1,8 @@
-## Utilize Instill Core
+## Serving StomaVision on [Instill Core](https://github.com/instill-ai/core)
 
-### How to pack your own model weight to be served on Instill Core
+### How to pack your own model weight to be served on [Instill Model](https://github.com/instill-ai/model)
 
-First move your newly trained weight `.pt` file into the path `/deploy/`
+First named your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`
 
 And zip the whole `/deploy` folder
 ```bash
@@ -12,7 +12,7 @@ mv stomavision.zip ../
 cd ..
 ```
 
-Next clone and launch `Instill Core`, You will need to have `docker` installed
+Next clone and launch `Instill Core`, it will automatically deploy [Instill Model](https://github.com/instill-ai/model) and [Instill VDP](https://github.com/instill-ai/vdp) for you. You will need to have `docker` installed
 ```bash
 git clone https://github.com/instill-ai/core.git
 cd core
@@ -77,7 +77,7 @@ you should get a response like this
     ]
 }
 ```
-### How to visualize th inference result with the power of Instill VDP
+### How to visualize th inference result with [Instill VDP](https://github.com/instill-ai/vdp)
 Now we have our model served on Instill Core, we can create a pipeline to easily visualize the inference result
 1. go to the `Pipelines` page
 2. click `Create Pipeline` button

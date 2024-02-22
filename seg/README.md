@@ -1,6 +1,6 @@
 # Yolov7 that supports ABRC
 
-This implementation supports ABRC stomata detection tasks using Yolov7 Instance Segmentation. To train Yolov7 instance segmentation models for stomata detection, please go to `README.md` in the `/abrc` for further details.
+This implementation supports ABRC stomata detection tasks using Yolov7 Instance Segmentation. To train Yolov7 instance segmentation models for stomata detection, please go to `README.md` in the root directory for further details.
 
 -- Instill AI Team, 21st Feb 2023
 

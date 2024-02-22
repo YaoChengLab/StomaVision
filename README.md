@@ -1,6 +1,6 @@
-# Train Instance Segmentation with Yolov7
+# Train StomaVision: Instance Segmentation with Yolov7
 
-To train **instance-segmentation** models with Yolov7 based on the pre-trained model, you must run the code under this branch or `u7`. Branch `main` and `mask` only consist of scripts for **object detection**. Below summaries the steps to run the code.
+### For [Serving with Instill Core](SERVE.md) and [Deploying Streamlit APP](DEPLOY.md), please refer to their docs respectively.
 
 ## Step 1: Install dependencies
 
