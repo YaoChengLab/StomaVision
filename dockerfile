@@ -20,10 +20,10 @@ WORKDIR /stomavision/app/.streamlit
 
 ARG API_TOKEN PIPELINE_NAME
 RUN bash -c 'echo "instill_api_key = \"$API_TOKEN\"" > secrets.toml'
-RUN bash -c 'echo "stomata_pipeline_name = \"$PIPELINE_NAME\"" > secrets.toml'
+RUN bash -c 'echo "stomata_pipeline_name = \"$PIPELINE_NAME\"" >> secrets.toml'
 
 WORKDIR /stomavision/app
 
 EXPOSE 8501
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
-ENTRYPOINT ["streamlit", "run", "/stomavision/app/stomata_pipeline.py", "--server.port=8501", "--server.address=0.0.0.0", "--browser.gatherUsageStats=false"]
+ENTRYPOINT ["streamlit", "run", "/stomavision/app/stomata_pipeline.py", "--server.port=8501", "--browser.gatherUsageStats=false"]

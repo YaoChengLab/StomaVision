@@ -253,7 +253,7 @@ def infer_image(images_dict: dict, process_field=None):
     return responses
 
 global_config.set_default(
-    url="localhost:8080",
+    url="api-gateway:8080",
     token=st.secrets["instill_api_key"],
     secure=False,
 )
