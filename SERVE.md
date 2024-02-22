@@ -2,7 +2,7 @@
 
 ### How to pack your own model weight to be served on [Instill Model](https://github.com/instill-ai/model)
 
-First named your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`
+First name your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`
 
 And zip the whole `/deploy` folder
 ```bash
@@ -32,7 +32,7 @@ Now we open a browser and
 10. click the profile icon at the top right corner and click `Settings`
 11. go to API Tokens tab
 12. click `Create Token`
-13. give a name and click `Create Token`
+13. give it a name and click `Create Token`
 14. click the copy icon to copy the whole token
 15. now in your terminal, replace the `{your_model_name_here}` and `{your_token_here}` and send the request
 ```bash
@@ -77,7 +77,7 @@ you should get a response like this
     ]
 }
 ```
-### How to visualize th inference result with [Instill VDP](https://github.com/instill-ai/vdp)
+### How to visualize the inference result with [Instill VDP](https://github.com/instill-ai/vdp)
 Now we have our model served on Instill Core, we can create a pipeline to easily visualize the inference result
 1. go to the `Pipelines` page
 2. click `Create Pipeline` button

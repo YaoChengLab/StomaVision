@@ -15,7 +15,7 @@ python seg/segment/train.py \
     --hyp hyp/hyp.scratch.abrc.yaml
 
 # Finetune p5 models with single GPU
-#python ../seg/segment/train.py \
+#python seg/segment/train.py \
 #--workers 8 \
 #--device 2 \
 #--batch-size 16 \

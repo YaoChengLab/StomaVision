@@ -111,7 +111,7 @@ We prepare a shell script `train.sh` for better visulisation. A couple of basic 
 - `--weight`: a `.py` file storing the pre-trained model. Leave it blank (i.e., `""`) if you wish to train the model from scratch.
 
 ```shell
-python ../seg/segment/train.py \
+python seg/segment/train.py \
 --workers 8 \
 --device cpu \
 --batch-size 16 \
@@ -143,7 +143,7 @@ YOLOv7 provides a Python script model validation (evaluation). It can be trigger
 data="dataset_name"
 model=/path/to/your/trained/model/weights
 device= 0 # set to `cpu` for infernce with cpu, 0,1,2,3 for inference with GPU.
-python ../seg/segment/val.py \
+python seg/segment/val.py \
 --workers 8 \
 --device $device \
 --batch-size 16 \
