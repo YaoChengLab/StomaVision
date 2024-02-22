@@ -17,7 +17,7 @@ Dataset structure here is identical to [Yolov5](https://github.com/ultralytics/y
 
 ### Folder Structure
 
-The dataset must be prepared in a specific way. The training script will first fetch images using the path defined in the `{custom_dataset}.yaml` stored under `/data`. The script finds the corresponding labels replace train:
+The dataset must be prepared in a specific way. The training script will first fetch images using the path defined in the `{custom_dataset}.yaml` stored under `data`. The script finds the corresponding labels replace train:
 
 - images: `{dataset_dir}/{dataset_name}/images/train/{images}`
 - labels: `{dataset_dir}/{dataset_name}/labels/train/{images}`

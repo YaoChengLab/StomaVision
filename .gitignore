@@ -55,7 +55,12 @@ _darcs
 /models
 /snippet
 
-#exp outputs
+# dataset
+dataset
+
+# exp outputs
 **/runs
 **/outputs
 
+# streamlit config
+.streamlit*
