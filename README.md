@@ -140,18 +140,18 @@ The outputs will be stored under `/seg/runs/train-seg/`, where `/weights/best.pt
 YOLOv7 provides a Python script model validation (evaluation). It can be triggered with
 
 ```shell
-data=../../google-drive/stomaVDP/2023-all-337/images/val
-model=../seg/runs/train-seg/2023-all-337-hyp-med-323
+data="dataset_name"
+model=/path/to/your/trained/model/weights
 device= 0 # set to `cpu` for infernce with cpu, 0,1,2,3 for inference with GPU.
 python ../seg/segment/val.py \
 --workers 8 \
 --device $device \
 --batch-size 16 \
---data data/$d.yaml \
+--data data/$data.yaml \
 --img 640 \
---weights ./runs/train-seg/$m/weights/best.pt \
+--weights $model/weights/best.pt \
 --conf 0.3 \
---name $m-$d
+--name $model-$data
 ```
 
 We also provide a script `val.sh` for users to evaluate their models on different datasets.
@@ -161,10 +161,10 @@ We also provide a script `val.sh` for users to evaluate their models on differen
 YOLOv7 provides a Python script for prediction with trained models. Below demonstrates an example. Ensure you assign image directory `image` and trained model `model` in advance.
 
 ```shell
-image=../../google-drive/stomaVDP/images/val
-model=../seg/runs/train-seg/yolov7-abrc-stomata1003/weights/best.pt
+image=/path/to/your/dataset/images/val
+model=/path/to/your/weights/best.pt
 device=cpu \ # cpu when infernce with cpu, 0,1,2,3 for inference with GPU.
-python ../seg/segment/predict.py \
+python seg/segment/predict.py \
 --device $device \
 --weights $model \
 --conf 0.3 \
