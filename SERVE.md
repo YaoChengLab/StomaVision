@@ -84,19 +84,23 @@ Now we have our model served on Instill Core, we can create a pipeline to easily
 3. give the pipeline a name and choose `Public` or `Private` base on your needs
 4. first we click the `Add Field` button in the `start` component
 5. select `Image`, give it a title and key and click save, they could be the same, you will reference the key later in other component,
-5. we will come back to `end` component later, now click `Add Component` on the top left corner
-6. select `Instill Model` under the `AI` category, this is to create a component that allow the pipeline to connect to the model we just served
-7. click the `Create Connector` within the newly created `Instill Model` component
-8. give it a name and make sure you select `Internal Mode`
-9. now back in the canvas, select `TASK_INSTANCE_SEGMENTATION` in the newly created `Instill Model` component
-10. you should find the model we've created earlier in the `Model Name` dropdown menu, select it
-11. type `${` in the `Image` field, and you will be hinted with the `key` name for our image input from our start component
-12. click `Add Component` again, and select `Image` from `Operators`
-13. select `TASK_DRAW_INSTANCE_SEGMENTATION`
-14. type `${` in the Objects field, and you will be hinted with the output objects from our `Instill Model` component
-15. type `${` in the `Image` field, and you will be hinted with the `key` name for our image input from our start component
-16. now we move on to end component, click `Add Field` and give it a `Title` and `Key`, and type `${` in the `Value` field, you will be hinted with some valid options, select the `image` output from our `Image Operator`, it should be something like `{image_operator_name}.output.image`, finally we click save
-17. click `Save` on the top right bar
-18. if you see all components are linked with solid blue lines, we are ready to trigger the pipeline!
-19. click the `Upload image` in the `start` component and select an image with stomata, click `Run` on the top right bar
-20. now in the `end` component, you will see the visualized output image
+6. we will come back to `end` component later, now click `Add Component` on the top left corner
+7. select `Instill Model` under the `AI` category, this is to create a component that allow the pipeline to connect to the model we just served
+8. click the `Create Connector` within the newly created `Instill Model` component
+9. give it a name and make sure you select `Internal Mode`
+10. now back in the canvas, select `TASK_INSTANCE_SEGMENTATION` in the newly created `Instill Model` component
+11. you should find the model we've created earlier in the `Model Name` dropdown menu, select it
+12. type `${` in the `Image` field, and you will be hinted with the `key` name for our image input from our start component
+13. click `Add Component` again, and select `Image` from `Operators`
+14. select `TASK_DRAW_INSTANCE_SEGMENTATION`
+15. type `${` in the Objects field, and you will be hinted with the output objects from our `Instill Model` component
+16. type `${` in the `Image` field, and you will be hinted with the `key` name for our image input from our start component
+> [!IMPORTANT]  
+> **End operator fields with streamlit app**  
+> If you are going to deploy streamlit app with this pipeline, the end operator must have the following two fields, 1. a field that reference the `instill model` component `output.objects`, and 2. a field that reference the `image` operator `output.image` field. You can define the key name as you like. For more information please refer to [DEPLOY.md](DEPLOY.md)
+17. now we move on to end component, click `Add Field` and give it a `Title` and `Key`, and type `${` in the `Value` field, you will be hinted with some valid options, select the `image` output from our `image` operator, it should be something like `{image_operator_name}.output.image`, and we click save
+18. click `Add Field` and give it a `Title` and `Key`, and type `${` in the `Value` field, you will be hinted with some valid options, select the `objects` output from our `instill model` component, it should be something like `{instill_model_name}.output.objects`, and we click save
+19. click `Save` on the top right bar
+20. if you see all components are linked with solid blue lines, we are ready to trigger the pipeline!
+21. click the `Upload image` in the `start` component and select an image with stomata, click `Run` on the top right bar
+22. now in the `end` component, you will see the visualized output image
