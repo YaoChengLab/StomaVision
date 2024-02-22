@@ -27,7 +27,7 @@ Each image should have a corresponding label file consisting of the annotations.
 ```
 {dataset_dir}
 ├── {dataset_name}
-│   ├── images           < images must be stored in the
+│   ├── images           < images must be stored in this dir
 │   │   ├──train
 │   │   ├──val
 │   │   ├──test

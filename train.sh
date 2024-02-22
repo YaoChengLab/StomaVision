@@ -1,4 +1,7 @@
 # Finetune p5 models with multiple GPUs
+
+data=example
+
 python -m torch.distributed.run \
     --nproc_per_node 2 \
     seg/segment/train.py \
@@ -6,11 +9,11 @@ python -m torch.distributed.run \
     --device 0,1 \
     --batch-size 16 \
     --cfg cfg/training/yolov7-seg.yaml \
-    --data data/2023-all-new-337.yaml \
+    --data data/$data.yaml \
     --img 640 \
     --weights 'model/yolov7x-seg.pt' \
-    --name yolov7-abrc-2023-all-new-337 \
-    --hyp hyp/hyp.scratch.abrc-high.yaml
+    --name yolov7-abrc-$data \
+    --hyp hyp/hyp.scratch.abrc.yaml
 
 # Finetune p5 models with single GPU
 #python ../seg/segment/train.py \

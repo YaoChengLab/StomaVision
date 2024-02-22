@@ -1,5 +1,5 @@
 # ABRC 2023 dataset
-path: /mnt/linux/abrc/abrc/dataset/stomaVDP/2023-Leafnet-F6-new-52
+path: /path/to/your/dataset
 train: images/train/
 val: images/val/
 test:

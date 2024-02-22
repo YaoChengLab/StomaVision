@@ -67,7 +67,7 @@ from helper import (
     draw_rotated_bboxes,
     fit_polygons_to_rotated_bboxes,
 )
-from helper import dilation_erosion_tensor_masks
+from helper import dilation_erosion_tensor_masks, calc_polygon_area
 
 
 @smart_inference_mode()
@@ -302,6 +302,13 @@ def run(
                     if len(fitted_rbbox) < 1:
                         continue
                     fitted_rbbox = fitted_rbbox[0]
+
+                    # Calc area
+                    area = calc_polygon_area(polygons)
+                    if len(area) < 1:
+                        continue
+                    area = area[0]
+
                     line = (
                         cls,
                         fitted_rbbox[0][0],
@@ -309,6 +316,7 @@ def run(
                         fitted_rbbox[1][0],
                         fitted_rbbox[1][1],
                         fitted_rbbox[2],
+                        area,
                     )
                     with open(f"{txt_path}.txt", "a") as f:
                         f.write(("%g " * len(line)).rstrip() % line + "\n")
@@ -330,7 +338,6 @@ def run(
                 # Save file
                 _, file = os.path.split(path)
                 file_name, _ = os.path.splitext(file)
-                LOGGER.info(f"FILE: {file_name}")
                 rbbox_save_name = f"{file_name}_rbbox.png"
                 rbbox_save_path = os.path.join(save_dir, rbbox_save_name)
                 cv2.imwrite(rbbox_save_path, img_draw)
