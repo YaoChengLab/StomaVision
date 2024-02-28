@@ -1,0 +1,4 @@
+stomata_pipeline_name = "stomata"
+stomata_pipeline_input_key = "input"
+stomata_pipeline_output_objects_key = "objects"
+stomata_pipeline_output_visualization_key = "vis"
