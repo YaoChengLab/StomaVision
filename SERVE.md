@@ -2,7 +2,7 @@
 
 ### How to pack your own model weight to be served on [Instill Model](https://github.com/instill-ai/model)
 
-First name your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`
+First name your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`, or you can use our pretrained model under the path `/model/model.py`
 
 And zip the whole `/deploy` folder
 ```bash
@@ -14,8 +14,8 @@ cd ..
 
 Next clone and launch `Instill Core`, it will automatically deploy [Instill Model](https://github.com/instill-ai/model) and [Instill VDP](https://github.com/instill-ai/vdp) for you. You will need to have `docker` installed
 ```bash
-git clone https://github.com/instill-ai/core.git
-cd core
+git clone -b v0.25.0-beta https://github.com/instill-ai/instill-core.git && cd instill-core
+# Launch all services
 make all
 ```
 
