@@ -1,8 +1,8 @@
-## Serving StomaVision on [Instill Core](https://github.com/instill-ai/core)
+## Serving StomaVision on [Instill Core](https://github.com/instill-ai/instill-core)
 
-### How to pack your own model weight to be served on [Instill Model](https://github.com/instill-ai/model)
+### How to pack your own model weight to be served on [Instill Core](https://github.com/instill-ai/instill-core)
 
-First name your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`
+First name your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`, or you can use our pretrained model under the path `/model/model.pt`
 
 And zip the whole `/deploy` folder
 ```bash
@@ -12,10 +12,10 @@ mv stomavision.zip ../
 cd ..
 ```
 
-Next clone and launch `Instill Core`, it will automatically deploy [Instill Model](https://github.com/instill-ai/model) and [Instill VDP](https://github.com/instill-ai/vdp) for you. You will need to have `docker` installed
+Next clone and launch `Instill Core`, it will automatically deploy Instill Model and Instill VDP for you. You will need to have `docker` installed
 ```bash
-git clone https://github.com/instill-ai/core.git
-cd core
+git clone -b v0.25.0-beta https://github.com/instill-ai/instill-core.git && cd instill-core
+# Launch all services
 make all
 ```
 
@@ -43,7 +43,7 @@ curl --location 'http://localhost:8080/model/v1alpha/users/admin/models/{your_mo
     "task_inputs": [
         {
             "instance_segmentation": {
-                "image_url": "https://upload.wikimedia.org/wikipedia/en/d/de/Nail_polish_impression_of_stomata.jpg"
+                "image_url": "https://images.fineartamerica.com/images-medium-large-5/stomata-on-epidermis-of-tulip-leaf-john-durhamscience-photo-library.jpg"
             }
         }
     ]
@@ -58,14 +58,14 @@ you should get a response like this
             "instance_segmentation": {
                 "objects": [
                     {
-                        "rle": "679,6,32,8,30,10,28,12,26,14,25,15,24,15,24,15,24,15,24,15,25,13,27,11,28,10,31,7,33,4,330",
+                        "rle": "114,2,6,4,5,4,5,4,5,4,5,4,5,4,6,2,19",
                         "category": "stomata",
-                        "score": 0.81463146,
+                        "score": 0.7837403,
                         "bounding_box": {
-                            "top": 216,
-                            "left": 1766,
-                            "width": 40,
-                            "height": 39
+                            "top": 469,
+                            "left": 225,
+                            "width": 22,
+                            "height": 9
                         }
                     },
                     ...
@@ -77,7 +77,7 @@ you should get a response like this
     ]
 }
 ```
-### How to visualize the inference result with [Instill VDP](https://github.com/instill-ai/vdp)
+### How to visualize the inference result with Instill VDP
 Now we have our model served on Instill Core, we can create a pipeline to easily visualize the inference result
 1. go to the `Pipelines` page
 2. click `Create Pipeline` button
