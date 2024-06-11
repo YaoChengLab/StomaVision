@@ -475,8 +475,8 @@ def get_detectron2_dicts_abrc(
                     ],
                     "bbox_mode": 0,
                     "segmentation": [poly],
-                    # TODO: more than 1 now
-                    "category_id": 0,  # single category
+                    # TODO: proper categorization. current label: 'stomata', 'outer_line'
+                    "category_id": 0 if category == "stomata" else 1,
                 }
                 objs.append(obj)
             else:
