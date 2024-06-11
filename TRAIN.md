@@ -45,7 +45,7 @@ Each image should have a corresponding label file consisting of the annotations.
 
 ## Step 3: Convert from Detectron2 JSON to Yolov7 compatible
 
-We currently prepare two scripts under the `util` folder for users to prepare dataset and convert annotations to YOLOv7 compatible format.
+We currently prepare two scripts under the `utils` folder for users to prepare dataset and convert annotations to YOLOv7 compatible format.
 
 ### 3-1. Convert from Detectron2 datasets
 
