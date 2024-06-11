@@ -1,18 +1,34 @@
 # Finetune p5 models with multiple GPUs
 
-data=example
+data=stomavision
+batch_size=8
 
-#python -m torch.distributed.run \
-python seg/segment/train.py \
-    --workers 6 \
-    --device cpu \
-    --batch-size 8 \
+# python seg/segment/train.py \
+#     --workers 6 \
+#     --device cpu \
+#     --batch-size $batch_size \
+#     --cfg cfg/training/yolov7-seg.yaml \
+#     --data data/$data.yaml \
+#     --img 640 \
+#     --weights 'model/yolov7-seg.pt' \
+#     --name yolov7-abrc-$data \
+#     --hyp hyp/hyp.scratch.abrc.yaml
+
+# sample command for distributed training with 2 gpu
+python -m torch.distributed.run \
+    --nproc_per_node 2 \
+    --master_port 9527 \
+    seg/segment/train.py \
+    --workers 32 \
+    --device 0,1 \
+    --batch-size $batch_size \
     --cfg cfg/training/yolov7-seg.yaml \
     --data data/$data.yaml \
     --img 640 \
     --weights 'model/yolov7-seg.pt' \
-    --name yolov7-abrc-$data \
-    --hyp hyp/hyp.scratch.abrc.yaml
+    --name $data-$batch_size \
+    --hyp hyp/hyp.scratch.abrc.yaml \
+    --epochs 500
 
 # Finetune p5 models with single GPU
 #python seg/segment/train.py \
