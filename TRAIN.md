@@ -13,6 +13,9 @@ pip3 install -r requirements.txt
 
 Dataset structure here is identical to [Yolov5](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data). Read for further details.
 
+### Preprocessed dataset
+You can download our [preprocesesed dataset](https://drive.google.com/file/d/1kjNbFXuDsFbnY7DLG_O-ytBnugtyFIW3/view?usp=drive_link) to fine-tune YoloV7 model. And skip to [Step 4](#step-4-prepare-configuration-yaml-files)
+
 ### Folder Structure
 
 The dataset must be prepared in a specific way. The training script will first fetch images using the path defined in the `{custom_dataset}.yaml` stored under `data`. The script finds the corresponding labels replace train:
@@ -45,13 +48,15 @@ Each image should have a corresponding label file consisting of the annotations.
 
 ## Step 3: Convert from Detectron2 JSON to Yolov7 compatible
 
-We currently prepare two scripts under the `util` folder for users to prepare dataset and convert annotations to YOLOv7 compatible format.
+We currently prepare two scripts under the `utils` folder for users to prepare dataset and convert annotations to YOLOv7 compatible format.
 
 ### 3-1. Convert from Detectron2 datasets
 
-`data-prep-detectron2.ipynb` converts labels from `Detectron` JSON format to Yolov7 compatible. Note that if the data is annoted with label studio, users need to prepare their dataset with script `detectron2/abrc/util/datra_augmentation.ipynb` in advance.
+Note that if the data is annoted with label studio, users need to prepare their dataset with script `data-prep-lablestudio.ipynb` in advance.
 
-> **NOTE**: Data suffling (i.e. split dataset into train, val and test) is done by the detetron2 script. This script only convert and prepare annotation file accordindly.
+`data-prep-detectron2.ipynb` converts labels from `Detectron` JSON format to Yolov7 compatible.
+
+> **NOTE**: Data suffling (i.e. split dataset into train, val and test) is done by the `data-prep-lablestudio.ipynb`. `data-prep-detectron2.ipynb` only convert and prepare annotation files accordindly.
 
 ### 3-2. Convert from COCO-data format
 
@@ -77,7 +82,7 @@ There are three YAML files need to be configured before training:
 - `cfg/{custom_model}.yaml`: a YAML file defining the model structure and class number.
 - `hyp/{custom_hypterparamaters}.yaml`: a YAML file defining training hyper-parameters.
 
-You can use the examples provided or define a new one for yourself. Yolov7 Segmentation is compatible with the models below:
+You can use the [stomavision.yaml](data/stomavision.yaml) provided if you downloaded our [preprocessed dataset](#preprocessed-dataset), or define a new one for yourself.
 
 > **NOTE**  
 > Your probabaly don't want to change `cfg` as it defines the network architecture. However, remember to update the class number to meet your application.
@@ -113,11 +118,11 @@ python seg/segment/train.py \
 --workers 8 \
 --device cpu \
 --batch-size 16 \
---data data/stomata100.yaml \
+--data data/stomavision.yaml \
 --img 640 \
 --cfg cfg/yolov7-seg.yaml \
 --weights 'models/yolov7-seg.pt' \
---name yolov7-abrc-stomata100 \
+--name yolov7-abrc-stomavision \
 --hyp data/hyp.scratch.abrc.yaml
 
 ```
