@@ -37,14 +37,14 @@ This public online version of [StomaVision](https://stomavision.streamlit.app) i
 <a id="local"></a>
 ## Deploy StomaVision locally
 
-StomaVision was developed based on YOLOv7 in combination with the [Instill Core](https://www.instill.tech/) and [Streamlit](https://streamlit.io/). The whole environment is packaged in two main containers. To setup your local instance of StomaVision app, follow the steps below
+StomaVision was developed based on YOLOv7 in combination with the [Instill Core](https://github.com/instill-ai/instill-core) and [Streamlit](https://streamlit.io/). The whole environment is packaged in two main containers. To setup your local instance of StomaVision app, follow the steps below
 
 <a id="instillcore"></a>
 ### Launch local instance of [**Instill Core**](https://github.com/instill-ai/instill-core)
 
 First you will need a local instance of `Instill Core` to host and serve the `StomaVision` model and utilize the versatile AI pipeline, refer to [Local Instill Core guide](SERVE.md) to set it up
 
-After you have `Instill Core` running locally, you can go to [https://localhost:3000](https://localhost:3000)s pipeline builder page to play around with the new created pipeline, you can learn more about it [here](https://www.instill.tech/docs/v0.25.0-beta/vdp/build)
+After you have `Instill Core` running locally, you can go to [https://localhost:3000](https://localhost:3000)s pipeline builder page to play around with the new created pipeline, you can learn more about it [here](https://www.instill.tech/docs/vdp/create)
 
 <a id="streamlit"></a>
 ### Launch local instance of StomaVision streamlit app
