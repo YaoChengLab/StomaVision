@@ -405,7 +405,11 @@ def draw_annotations(
 
 
 def get_detectron2_dicts_abrc(
-    img_dir: str, json_filename: str, dataset_dicts=[], delta=5
+    img_dir: str,
+    json_filename: str,
+    dataset_dicts=[],
+    delta=5,
+    multi_label=True,
 ) -> list:
     r"""
     This function parse the JSON file prepared by ABRC with Label Studio into a list of COCO compatible annotation dictionaries.
@@ -442,7 +446,9 @@ def get_detectron2_dicts_abrc(
                 print("record width:", record["width"])
                 print("original height:", anno["original_height"])
                 print("record width:", record["height"])
-                print("label image dimension and record dimension does not match, skip image")
+                print(
+                    "label image dimension and record dimension does not match, skip image"
+                )
                 break
 
             if (
@@ -450,7 +456,10 @@ def get_detectron2_dicts_abrc(
                 and "pavement cell" in anno["value"]["polygonlabels"]
             ):
                 continue
-            if not "ellipselabels" in anno["value"] or not len(anno["value"]["ellipselabels"]) > 0:
+            if (
+                not "ellipselabels" in anno["value"]
+                or not len(anno["value"]["ellipselabels"]) > 0
+            ):
                 continue
 
             success, poly, _, category = gen_polygon_w_boundingbox_from_annotation(
@@ -462,6 +471,11 @@ def get_detectron2_dicts_abrc(
             poly = [(float(x), float(y)) for x, y in poly]
             poly = [p for x in poly for p in x]
             if success:
+                if category == "Open" or category == "close":
+                    category = "Stomata"
+                if not multi_label:
+                    if category != "Stomata":
+                        continue
                 if len(poly) <= 4:
                     continue
                 obj = {

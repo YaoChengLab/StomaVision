@@ -1,7 +1,8 @@
 # Finetune p5 models with multiple GPUs
 
-data=stomavision
 batch_size=8
+
+time=$(date +%F_%T)
 
 # python seg/segment/train.py \
 #     --workers 6 \
@@ -15,20 +16,32 @@ batch_size=8
 #     --hyp hyp/hyp.scratch.abrc.yaml
 
 # sample command for distributed training with 2 gpu
-python -m torch.distributed.run \
-    --nproc_per_node 2 \
-    --master_port 9527 \
-    seg/segment/train.py \
-    --workers 32 \
-    --device 0,1 \
+    # -m torch.distributed.run \
+    # --nproc_per_node 2 \
+    # --sync-bn \
+# python seg/segment/train.py \
+#     --workers 8 \
+#     --device 0 \
+#     --batch-size $batch_size \
+#     --cfg cfg/training/yolov7-seg.yaml \
+#     --data data/stomavision.yaml \
+#     --img 640 \
+#     --weights 'model/yolov7-seg.pt' \
+#     --name single-label-$time \
+#     --hyp hyp/hyp.scratch.abrc.yaml \
+#     --epochs 300
+
+python seg/segment/train.py \
+    --workers 8 \
+    --device 1 \
     --batch-size $batch_size \
-    --cfg cfg/training/yolov7-seg.yaml \
-    --data data/$data.yaml \
+    --cfg cfg/training/yolov7-seg-multilabel.yaml \
+    --data data/stomavision-multilabel.yaml \
     --img 640 \
     --weights 'model/yolov7-seg.pt' \
-    --name $data-$batch_size \
+    --name multi-label-$time \
     --hyp hyp/hyp.scratch.abrc.yaml \
-    --epochs 500
+    --epochs 300
 
 # Finetune p5 models with single GPU
 #python seg/segment/train.py \
