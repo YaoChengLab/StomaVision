@@ -16,6 +16,59 @@ COLORS = {
 }
 
 
+def transform_bbox(bbox, crop_x1, crop_y1):
+    """
+    Transform a bounding box from original image coordinates to new cropped image coordinates.
+
+    Args:
+        bbox (list[float]): Bounding box with format [x1, y1, x2, y2].
+        crop_x1 (int): X-coordinate of the top-left corner of the crop rectangle.
+        crop_y1 (int): Y-coordinate of the top-left corner of the crop rectangle.
+
+    Returns:
+        list[float]: Transformed bounding box with format [x1, y1, x2, y2].
+    """
+    # Subtract the top-left corner of the crop rectangle from each coordinate pair
+    transformed_bbox = [
+        bbox[0] - crop_x1,
+        bbox[1] - crop_y1,
+        bbox[2] - crop_x1,
+        bbox[3] - crop_y1,
+    ]
+
+    return transformed_bbox
+
+
+def transform_polygons(polygons, crop_x1, crop_y1):
+    """
+    Transform a list of polygons from original image coordinates to new cropped image coordinates.
+
+    Args:
+        polygons (list[list[float]]): List of polygons with absolute coordinates in pixels.
+        crop_x1 (int): X-coordinate of the top-left corner of the crop rectangle.
+        crop_y1 (int): Y-coordinate of the top-left corner of the crop rectangle.
+
+    Returns:
+        list[list[float]]: Transformed list of polygons with coordinates relative to the new cropped image size.
+    """
+    transformed_polygons = []
+    for polygon in polygons:
+        # Unpack the polygon coordinates into separate lists
+        coords = [polygon[i : i + 2] for i in range(0, len(polygon), 2)]
+
+        # Subtract the top-left corner of the crop rectangle from each coordinate pair
+        transformed_coords = [(x - crop_x1, y - crop_y1) for x, y in coords]
+
+        # Flatten the list of tuples back into a single list
+        transformed_polygon = [
+            coord for tuple_ in transformed_coords for coord in tuple_
+        ]
+
+        transformed_polygons.append(transformed_polygon)
+
+    return transformed_polygons
+
+
 def random_color():
     return [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
 
@@ -409,7 +462,7 @@ def get_detectron2_dicts_abrc(
     json_filename: str,
     dataset_dicts=[],
     delta=5,
-    multi_label=True,
+    single_label="",
 ) -> list:
     r"""
     This function parse the JSON file prepared by ABRC with Label Studio into a list of COCO compatible annotation dictionaries.
@@ -473,9 +526,12 @@ def get_detectron2_dicts_abrc(
             if success:
                 if category == "Open" or category == "close":
                     category = "Stomata"
-                if not multi_label:
-                    if category != "Stomata":
+                if single_label != "":
+                    if category.lower() not in [single_label, "pore unclear stomata"]:
                         continue
+                    category_id = 0
+                else:
+                    category_id = 0 if category == "Stomata" else 1
                 if len(poly) <= 4:
                     continue
                 obj = {
@@ -490,7 +546,7 @@ def get_detectron2_dicts_abrc(
                     "bbox_mode": 0,
                     "segmentation": [poly],
                     # TODO: proper categorization. current label: 'stomata', 'outer_line'
-                    "category_id": 0 if category == "Stomata" else 1,
+                    "category_id": category_id,
                 }
                 objs.append(obj)
             else:
