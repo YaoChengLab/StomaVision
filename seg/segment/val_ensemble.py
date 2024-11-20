@@ -170,13 +170,17 @@ def process_batch(
     return torch.tensor(correct, dtype=torch.bool, device=iouv.device)
 
 
-def pad_or_truncate(tensor, x_fixed):
+def pad_or_truncate(tensor, x_fixed, device):
     # If the tensor's first dimension is greater than x_fixed, truncate it to size x_fixed.
     if tensor.shape[0] > x_fixed:
         return tensor[:x_fixed]
-    else:
-        # Otherwise, pad the tensor with zeros to match the desired size of x_fixed.
-        return torch.nn.functional.pad(tensor, (0, 0, 0, x_fixed - tensor.shape[0]))
+    elif tensor.shape[0] < x_fixed:
+        zero_tensors = torch.zeros(
+            (x_fixed - tensor.shape[0],) + tuple(tensor[0].shape)
+        ).to(device, non_blocking=True)
+        return torch.cat([tensor, zero_tensors], dim=0)
+
+    return tensor
 
 
 @smart_inference_mode()
@@ -418,25 +422,6 @@ def run(
                     proto_out_stage2 = train_out_stage2[1][sii]
                     if pred_stage2.shape[0] == 0:
                         continue
-                    # Masks
-                    pred_masks_stage2 = process(
-                        proto_out_stage2,
-                        pred_stage2[:, 6:],
-                        pred_stage2[:, :4],
-                        shape=cropped_image[sii].shape[1:],
-                        upsample=True,
-                    )
-
-                    pred_masks_stage2 = scale_masks(
-                        cropped_image[sii].shape[1:],
-                        pred_masks_stage2.permute(1, 2, 0),
-                        [
-                            cropped_image_original.shape[1],
-                            cropped_image_original.shape[2],
-                            3,
-                        ],
-                        # ratio_pad=[ratio_stage2, pad_stage2],
-                    )
 
                     # Predictions
                     ## to stage 1 inference space pred
@@ -461,23 +446,55 @@ def run(
                         shapes[si][1],
                     )
 
+                    # Masks
+                    pred_masks_stage2 = process(
+                        proto_out_stage2,
+                        pred_stage2[:, 6:],
+                        pred_stage2[:, :4],
+                        shape=cropped_image[sii].shape[1:],
+                        upsample=True,
+                    )
+
+                    pred_masks_stage2 = scale_masks(
+                        cropped_image[sii].shape[1:],
+                        pred_masks_stage2.permute(1, 2, 0).contiguous().cpu().numpy(),
+                        [
+                            cropped_image_original.shape[1],
+                            cropped_image_original.shape[2],
+                            3,
+                        ],
+                        # ratio_pad=[ratio_stage2, pad_stage2],
+                    )
+                    pred_masks_stage2 = torch.tensor(
+                        pred_masks_stage2, device=device
+                    ).permute(2, 0, 1)
                     # transform mask
-                    # pred_masks_stage2 = expand_and_shift_masks(
-                    #     pred_masks_stage2,
-                    #     x_offset=x1,
-                    #     y_offset=y1,
-                    #     target_shape=cropped_image[sii].shape[1:],
-                    # )
+                    pred_masks_stage2 = expand_and_shift_masks(
+                        pred_masks_stage2,
+                        x_offset=x1,
+                        y_offset=y1,
+                        target_shape=cropped_image[sii].shape[1:],
+                    )
 
                     pred_stage2_list.append(pred_stage2n)
                     pred_mask_stage2_list.append(pred_masks_stage2)
 
+            pred_stage2_list = [
+                pad_or_truncate(t, int(200 / pred_c.shape[0]), device)
+                for t in pred_stage2_list
+            ]
             pred_stage2n = torch.cat(pred_stage2_list, dim=0)
+            pred_mask_stage2_list = [
+                pad_or_truncate(t, int(200 / pred_c.shape[0]), device)
+                for t in pred_mask_stage2_list
+            ]
+            pred_mask_stage2n = torch.cat(pred_mask_stage2_list, dim=0)
+
             plot_dets = [
-                pad_or_truncate(t, int(200 / pred_c.shape[0])) for t in plot_dets
+                pad_or_truncate(t, int(200 / pred_c.shape[0]), device)
+                for t in plot_dets
             ]
             plot_dets = torch.cat(plot_dets, dim=0)
-            # pred_mask_stage2n = torch.cat(pred_mask_stage2_list, dim=0)
             # ============================================================================================
             # =======================================Stage2===============================================
             # ============================================================================================
@@ -520,9 +537,7 @@ def run(
             # concat
             # print(pred_masks.shape)
             # print(pred_masks_stage2.shape)
-            final_pred_masks = (
-                pred_masks  # torch.cat((pred_masks, pred_mask_stage2n), dim=0)
-            )
+            final_pred_masks = torch.cat((pred_masks, pred_mask_stage2n), dim=0)
             final_predn = torch.cat((predn, pred_stage2n), dim=0)
 
             # Evaluate
@@ -534,7 +549,7 @@ def run(
                 labelsn = torch.cat((labels[:, 0:1], tbox), 1)  # native-space labels
                 correct_bboxes = process_batch(final_predn, labelsn, iouv)
                 correct_masks = process_batch(
-                    predn,
+                    final_predn,
                     labelsn,
                     iouv,
                     final_pred_masks,
@@ -556,7 +571,7 @@ def run(
 
             final_pred_masks = torch.as_tensor(final_pred_masks, dtype=torch.uint8)
             if plots and batch_i < 3:
-                plot_masks.append(final_pred_masks[:15].cpu())  # filter top 15 to plot
+                plot_masks.append(final_pred_masks.cpu())  # filter top 15 to plot
 
             # Save/log
             if save_txt:
@@ -581,12 +596,12 @@ def run(
 
         for i in range(len(out_stage1)):
             out_stage1[i] = torch.cat((out_stage1[i], plot_stage_2_list[i]), dim=0)
-        plot_stage_2_list = [pad_or_truncate(t, 300) for t in out_stage1]
+        plot_stage_2_list = [pad_or_truncate(t, 300, device) for t in out_stage1]
         plot_stage_2_list = torch.stack(plot_stage_2_list, dim=0)
         # Plot images
         if plots and batch_i < 3:
-            # if len(plot_masks):
-            #     plot_masks = torch.cat(plot_masks, dim=0)
+            if len(plot_masks):
+                plot_masks = torch.cat(plot_masks, dim=0)
             plot_images_and_masks(
                 im,
                 targets,
@@ -598,7 +613,7 @@ def run(
             plot_images_and_masks(
                 im,
                 output_to_target(plot_stage_2_list, max_det=300),
-                [],
+                plot_masks,
                 paths,
                 save_dir / f"val_batch{batch_i}_pred.jpg",
                 names,

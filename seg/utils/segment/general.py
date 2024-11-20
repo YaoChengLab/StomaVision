@@ -100,11 +100,11 @@ def expand_and_shift_masks(masks, target_shape=(640, 640), x_offset=0, y_offset=
     pad_right = max(0, target_width - original_width)
 
     # Apply padding to target shape
-    expanded_masks = F.pad(
+    masks = F.pad(
         masks, (0, pad_right, 0, pad_bottom), mode="constant", value=0
     )
 
-    return expanded_masks
+    return masks
 
 
 def scale_masks(img1_shape, masks, img0_shape, ratio_pad=None):
