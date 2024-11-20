@@ -75,7 +75,7 @@ for s in suffix:
     annFile = (
         f"/mnt/local/abrc/coco_dataset/StomaVision-multilabel/labels/labels_{s}.json"
     )
-    output_path = "/mnt/local/abrc/coco_dataset/StomaVision-cropped"
+    output_path = "/mnt/local/abrc/parsed_dataset/StomaVision-cropped"
     output_image_path = os.path.join(output_path, "images", s)
     output_label_path = os.path.join(output_path, "labels")
     os.makedirs(output_image_path, exist_ok=True)
@@ -94,5 +94,7 @@ for s in suffix:
         for i in range(len(output_dataset)):
             output_dataset[i]["image_id"] = i
 
+        print(f"---------------------------------------------")
+        print(f"{s} set sample: {len(dataset)}")
         with open(f"{output_label_path}/labels_{s}.json", "w") as f:
             json.dump(list(output_dataset), f)

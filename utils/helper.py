@@ -5,6 +5,7 @@ import os, json, cv2, random, shutil
 
 from skimage import measure
 from cv2 import MORPH_RECT
+from const import EXCLUDE_LIST
 
 random.seed(0)
 CATEGORIES = ["Open", "close", "Unknown"]
@@ -478,7 +479,13 @@ def get_detectron2_dicts_abrc(
     labelstudio_annotations = filter_annotations(img_dir, json_filename)
     for idx, v in enumerate(labelstudio_annotations):
         record = {}
-        img_filename = v["image"]
+
+        img_filename: str = v["image"]
+        filename = img_filename.split("/")[-1].rsplit(".", 1)[0]
+        if filename in EXCLUDE_LIST:
+            print(f"skip missing label image: {filename}")
+            continue
+
         annotations = v["annotations"]
         img_h, img_w = cv2.imread(img_filename).shape[:2]
 
@@ -495,24 +502,29 @@ def get_detectron2_dicts_abrc(
                 anno["original_width"] != record["width"]
                 or anno["original_height"] != record["height"]
             ):
-                print("original width:", anno["original_width"])
-                print("record width:", record["width"])
-                print("original height:", anno["original_height"])
-                print("record width:", record["height"])
-                print(
-                    "label image dimension and record dimension does not match, skip image"
-                )
-                break
+                # print("original width:", anno["original_width"])
+                # print("record width:", record["width"])
+                # print("original height:", anno["original_height"])
+                # print("record width:", record["height"])
+                # print(
+                #     "label image dimension and record image dimension does not match, skip label"
+                #     f"image: {filename}"
+                # )
+                # continue
+                anno["original_width"] = record["width"]
+                anno["original_height"] = record["height"]
 
             if (
                 "polygonlabels" in anno["value"]
                 and "pavement cell" in anno["value"]["polygonlabels"]
             ):
+                print(f"skip missing label image: {filename}")
                 continue
             if (
                 not "ellipselabels" in anno["value"]
                 or not len(anno["value"]["ellipselabels"]) > 0
             ):
+                print(f"skip missing label image: {filename}")
                 continue
 
             success, poly, _, category = gen_polygon_w_boundingbox_from_annotation(
