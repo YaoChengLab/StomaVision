@@ -192,7 +192,7 @@ def run(
     imgsz=640,  # inference size (pixels)
     conf_thres=0.001,  # confidence threshold
     iou_thres=0.6,  # NMS IoU threshold
-    max_det=300,  # maximum detections per image
+    max_det=100,  # maximum detections per image
     task="val",  # train, val, test, speed or study
     device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     workers=8,  # max dataloader workers (per RANK in DDP mode)
@@ -365,13 +365,16 @@ def run(
                 labels=lb,
                 multi_label=True,
                 agnostic=True,
-                max_det=100,
+                max_det=max_det,
                 nm=nm,
             )
 
-        # Metrics
+        # stage 2 params
+        top_n_box = 50
+        max_det_stage2 = 4
         plot_masks = []  # masks for plotting
         for si, pred in enumerate(out_stage1):
+            # Metrics
             labels = targets[targets[:, 0] == si, 1:]
             nl, npr = labels.shape[0], pred.shape[0]  # number of labels, predictions
             path, shape = Path(paths[si]), shapes[si][0]
@@ -392,7 +395,7 @@ def run(
             pred_stage2_list = []
             plot_dets = []
             pred_mask_stage2_list = []
-            for box in pred_c[:, :4]:
+            for box in pred_c[:top_n_box, :4]:
                 x1, y1, x2, y2 = torch.round(box).to(torch.int)
                 cropped_image_original = im[si][:, y1:y2, x1:x2]
                 cropped_image, ratio_stage2, pad_stage2 = letterbox_tensor(
@@ -414,7 +417,7 @@ def run(
                     labels=lb,
                     multi_label=True,
                     agnostic=True,
-                    max_det=100,
+                    max_det=max_det_stage2,
                     nm=nm,
                 )
 
@@ -430,7 +433,7 @@ def run(
                         cropped_image[sii].shape[1:],
                         pred_stage2n[:, :4],
                         cropped_image_original.shape[1:],
-                        ratio_pad=[ratio_stage2, pad_stage2],
+                        # ratio_pad=[ratio_stage2, tuple(pad * 2 for pad in pad_stage2)],
                     )
                     ## transform pred
                     offsets = torch.tensor([x1, y1, x1, y1]).to(
@@ -479,21 +482,8 @@ def run(
                     pred_stage2_list.append(pred_stage2n)
                     pred_mask_stage2_list.append(pred_masks_stage2)
 
-            pred_stage2_list = [
-                pad_or_truncate(t, int(200 / pred_c.shape[0]), device)
-                for t in pred_stage2_list
-            ]
             pred_stage2n = torch.cat(pred_stage2_list, dim=0)
-            pred_mask_stage2_list = [
-                pad_or_truncate(t, int(200 / pred_c.shape[0]), device)
-                for t in pred_mask_stage2_list
-            ]
             pred_mask_stage2n = torch.cat(pred_mask_stage2_list, dim=0)
-
-            plot_dets = [
-                pad_or_truncate(t, int(200 / pred_c.shape[0]), device)
-                for t in plot_dets
-            ]
             plot_dets = torch.cat(plot_dets, dim=0)
             # ============================================================================================
             # =======================================Stage2===============================================
@@ -535,8 +525,6 @@ def run(
             )  # native-space pred
 
             # concat
-            # print(pred_masks.shape)
-            # print(pred_masks_stage2.shape)
             final_pred_masks = torch.cat((pred_masks, pred_mask_stage2n), dim=0)
             final_predn = torch.cat((predn, pred_stage2n), dim=0)
 
@@ -571,7 +559,11 @@ def run(
 
             final_pred_masks = torch.as_tensor(final_pred_masks, dtype=torch.uint8)
             if plots and batch_i < 3:
-                plot_masks.append(final_pred_masks.cpu())  # filter top 15 to plot
+                plot_m = torch.cat(
+                    (pred_masks[:top_n_box], pred_mask_stage2n[:top_n_box]), dim=0
+                )
+                plot_m = torch.as_tensor(plot_m, dtype=torch.uint8)
+                plot_masks.append(plot_m.cpu())
 
             # Save/log
             if save_txt:
@@ -595,8 +587,12 @@ def run(
             plot_stage_2_list.append(plot_dets)
 
         for i in range(len(out_stage1)):
-            out_stage1[i] = torch.cat((out_stage1[i], plot_stage_2_list[i]), dim=0)
-        plot_stage_2_list = [pad_or_truncate(t, 300, device) for t in out_stage1]
+            out_stage1[i] = torch.cat(
+                (out_stage1[i][:top_n_box], plot_stage_2_list[i][:top_n_box]), dim=0
+            )
+        plot_stage_2_list = [
+            pad_or_truncate(t, 2 * top_n_box, device) for t in out_stage1
+        ]
         plot_stage_2_list = torch.stack(plot_stage_2_list, dim=0)
         # Plot images
         if plots and batch_i < 3:
@@ -612,7 +608,7 @@ def run(
             )
             plot_images_and_masks(
                 im,
-                output_to_target(plot_stage_2_list, max_det=300),
+                output_to_target(plot_stage_2_list, max_det=2 * top_n_box),
                 plot_masks,
                 paths,
                 save_dir / f"val_batch{batch_i}_pred.jpg",
@@ -722,7 +718,7 @@ def parse_opt():
         "--iou-thres", type=float, default=0.6, help="NMS IoU threshold"
     )
     parser.add_argument(
-        "--max-det", type=int, default=300, help="maximum detections per image"
+        "--max-det", type=int, default=100, help="maximum detections per image"
     )
     parser.add_argument(
         "--task", default="val", help="train, val, test, speed or study"
