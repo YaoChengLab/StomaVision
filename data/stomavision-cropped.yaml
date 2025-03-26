@@ -1,0 +1,10 @@
+# ABRC 2024 dataset
+path: /mnt/local/abrc/parsed_dataset/StomaVision-cropped
+train: images/train/
+val: images/val/
+test: images/test/
+
+# class names
+# replace all class names list with your class names
+names:
+  0: stomata
