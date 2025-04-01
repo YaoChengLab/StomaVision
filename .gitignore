@@ -33,7 +33,6 @@ wheels/
 model_ts*.txt
 *pt
 model.txt
-!model/model.pt
 
 # ipython/jupyter notebooks
 # *.ipynb

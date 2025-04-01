@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# weight
-models="single-label-1 multi-label-1"
-
-# for multilable validation
+# for multilabel validation
 # python seg/segment/val.py \
 #     --workers 8 \
 #     --device 1 \

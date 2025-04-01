@@ -1,0 +1,36 @@
+version: v1beta
+component:
+  stomata-vis-operator-seg:
+    type: image
+    task: TASK_DRAW_INSTANCE_SEGMENTATION
+    input:
+      image: ${variable.input}
+      objects: ${yolov7-stomata.output.objects}
+      showScore: false
+  stomata-vis-operator-bbox:
+    type: image
+    task: TASK_DRAW_DETECTION
+    input:
+      image: ${variable.input}
+      objects: ${yolov7-stomata.output.objects}
+      showScore: false
+  yolov7-stomata:
+    type: instill-model
+    task: TASK_INSTANCE_SEGMENTATION
+    input:
+      image-base64: ${variable.input}
+      model-name: admin/stomavision
+variable:
+  input:
+    title: Input
+    description: Upload the Stomata Image
+    type: image
+output:
+  vis-v2-bbox:
+    title: V2 visualization bbox
+    value: ${stomata-vis-operator-bbox.output.image}
+    instill-ui-order: 2
+  vis-v2-seg:
+    title: V2 visualization seg
+    value: ${stomata-vis-operator-seg.output.image}
+    instill-ui-order: 3

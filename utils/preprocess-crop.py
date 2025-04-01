@@ -26,6 +26,7 @@ def process_obj(obj, new_dataset):
 
         stomata_exists = False
         for stomata in annos:
+            # depending on your catagory_id, you may need to change it here
             if stomata["category_id"] != 0:
                 continue
             stomata_bbox = stomata["bbox"]

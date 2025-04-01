@@ -1,0 +1,8 @@
+build:
+  gpu: true
+  python_version: "3.11"
+  cuda_version: "12.1"
+  python_packages:
+    - torch==2.6.0
+    - torchvision==0.21.0
+    - opencv-contrib-python-headless==4.11.0.86

@@ -14,7 +14,14 @@ pip3 install -r requirements.txt
 Dataset structure here is identical to [Yolov5](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data). Read for further details.
 
 ### Preprocessed dataset
-You can download our [preprocesesed dataset](https://drive.google.com/file/d/1kjNbFXuDsFbnY7DLG_O-ytBnugtyFIW3/view?usp=drive_link) to fine-tune YoloV7 model. And skip to [Step 4](#step-4-prepare-configuration-yaml-files)
+You can download our preprocesesed dataset to fine-tune YoloV7 model. And skip to [Step 4](#step-4-prepare-configuration-yaml-files)
+
+- [multilabel dataset](https://drive.google.com/file/d/1kjNbFXuDsFbnY7DLG_O-ytBnugtyFIW3/view?usp=drive_link)
+  - for fine-tuning model that detects both outer-line and pore
+- [outer-line dataset](https://drive.google.com/file/d/1_D-kOylGTpYnxAfBpEdQSo8U7wRLWUIf/view?usp=drive_link)
+  - for fine-tuning ensemble model outer-line detection
+- [cropped dataset](https://drive.google.com/file/d/1_D-kOylGTpYnxAfBpEdQSo8U7wRLWUIf/view?usp=drive_link)
+  - for fine-tuning ensemble model pore ddetection
 
 ### Folder Structure
 
@@ -74,6 +81,10 @@ To test the correctness of converted annotations, we prepare `draw-mark.ipynb` f
 > - [Author's instruction](https://github.com/WongKinYiu/yolov7/issues/752)
 > - [Train Custom Data](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
 
+### 3-4. Create cropped dataset
+For fine-tuning ensemble model's second stage(pore detection), you will need to prepare an additional datset that crops out the stomata label and image. Please refer to [this script](./utils/preprocess-crop.py) to preprocess the original dataset and create a cropped dataset.
+- You may need to change the `catalog_id` in the script depending on your label
+
 ## Step 4: Prepare configuration YAML files
 
 There are three YAML files need to be configured before training:
@@ -82,7 +93,7 @@ There are three YAML files need to be configured before training:
 - `cfg/{custom_model}.yaml`: a YAML file defining the model structure and class number.
 - `hyp/{custom_hypterparamaters}.yaml`: a YAML file defining training hyper-parameters.
 
-You can use the [stomavision.yaml](data/stomavision.yaml) provided if you downloaded our [preprocessed dataset](#preprocessed-dataset), or define a new one for yourself.
+You can use the [predefined data files](data) provided if you downloaded our [preprocessed dataset](#preprocessed-dataset), or define a new one for yourself.
 
 > **NOTE**  
 > Your probabaly don't want to change `cfg` as it defines the network architecture. However, remember to update the class number to meet your application.
