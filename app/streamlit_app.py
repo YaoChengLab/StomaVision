@@ -22,9 +22,7 @@ from utils import (
 
 # Set Instill Cloud API token from Streamlit secrets
 instill_api_token = (
-    st.secrets["INSTILL_API_TOKEN"]
-    if "INSTILL_API_TOKEN" in st.secrets
-    else None
+    st.secrets["INSTILL_API_TOKEN"] if "INSTILL_API_TOKEN" in st.secrets else None
 )
 instill_org_uid = None
 
@@ -40,9 +38,8 @@ def sample_input():
         label="Select a sample image to inference",
         use_container_width=False,
         images=[
-            "stomavision/samples/c_tr_56_cut_want.jpg",
-            "stomavision/samples/c_tr_68_cut_want.jpg",
-            "stomavision/samples/u_tr_26.png",
+            "samples/c_tr_68_cut_want.jpg",
+            "samples/u_tr_26.png",
         ],
     )
     img = cv2.imread(img)
@@ -88,14 +85,12 @@ def preprocess_and_render_layout(image_dict, process_field=None):
             if process_field is None:
                 col1, col2, col3 = st.columns(3)
             predictions = output[0]["objects"]
-            vis_output: str = output[0]["vis-v2-seg"]
-            if vis_output.startswith("https"):
-                print("ITS URL!!!")
+            vis_output: str = output[0]["vis"]
+            if vis_output.startswith("https") or vis_output.startswith("http"):
                 resp = requests.get(vis_output, timeout=180)
                 resp.raise_for_status()
                 predicted_image = np.array(Image.open(io.BytesIO(resp.content)))
             else:
-                print("ITS BASE64!!!")
                 predicted_image = np.array(
                     Image.open(io.BytesIO(base64.b64decode(vis_output.split(",")[1])))
                 )
@@ -353,12 +348,12 @@ st.sidebar.title("Settings")
 lang = st.toggle("Toggle for Chinese")
 if not lang:
     st.markdown(
-        Path("stomavision/markdowns/readme_EN.md").read_text("utf-8"),
+        Path("markdowns/readme_EN.md").read_text("utf-8"),
         unsafe_allow_html=True,
     )
 else:
     st.markdown(
-        Path("stomavision/markdowns/readme_CH.md").read_text("utf-8"),
+        Path("markdowns/readme_CH.md").read_text("utf-8"),
         unsafe_allow_html=True,
     )
 

@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone -b heiru/CUS-136 https://github.com/heiruwu/StomaVision.git .
+COPY ./app app
 
 RUN pip3 install -r app/requirements.txt
 
