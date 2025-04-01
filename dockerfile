@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN git clone -b heiru/CUS-136 https://github.com/heiruwu/StomaVision.git .
 
-RUN pip3 install -r requirements.txt
 RUN pip3 install -r app/requirements.txt
 
 RUN mkdir /stomavision/app/.streamlit
