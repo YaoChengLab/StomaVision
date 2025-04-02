@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import requests
+import json
 from tempfile import NamedTemporaryFile
 from pathlib import Path
 from PIL import Image
@@ -19,6 +20,7 @@ from utils import (
     calc_polygon_area,
     random_color,
 )
+from download import download_modal
 
 # Set Instill Cloud API token from Streamlit secrets
 instill_api_token = (
@@ -78,6 +80,8 @@ def preprocess_and_render_layout(image_dict, process_field=None):
             col2.header("Image with prediction")
             col3.header("Stomata prediction metrics")
             dfs = []
+            p_images = []
+            error_fns = []
         else:
             process_field.text("Average measurements per frame")
             t_measurements = []
@@ -85,107 +89,114 @@ def preprocess_and_render_layout(image_dict, process_field=None):
             orig_img = image_dict[file_name]
             if process_field is None:
                 col1, col2, col3 = st.columns(3)
-            predictions = output[0]["objects"]
-            vis_output: str = output[0]["vis"]
-            if vis_output.startswith("https") or vis_output.startswith("http"):
-                resp = requests.get(vis_output, timeout=180)
-                resp.raise_for_status()
-                predicted_image = np.array(Image.open(io.BytesIO(resp.content)))
-            else:
-                predicted_image = np.array(
-                    Image.open(io.BytesIO(base64.b64decode(vis_output.split(",")[1])))
-                )
-
             # measurement = (id, long_axis, short_axis, ratio, area)
             measurements = []
-            # post process
-            for idx, pred in enumerate(predictions):
-                bbox = pred["bounding-box"]
-                category = pred["category"]
-                rle = pred["rle"]
-                score = pred["score"]
-
-                rle = {
-                    "counts": rle.split(","),
-                    "size": [bbox["height"], bbox["width"]],
-                }
-
-                # mask = rle2mask(mask_rle=rle, shape=orig_img.shape[:2])
-                compressed_rle = cocomask.frPyObjects(
-                    rle, rle.get("size")[0], rle.get("size")[1]
-                )
-                mask = cocomask.decode(compressed_rle)
-                polygons = binary_mask_to_polygon(mask)
-                fitted_rbbox = fit_polygons_to_rotated_bboxes(polygons)
-                if len(fitted_rbbox) < 1:
-                    continue
-                fitted_rbbox = fitted_rbbox[0]
-                area = calc_polygon_area(polygons)
-                if len(area) < 1:
-                    continue
-                area = area[0]
-
-                # Get long and short axis
-                if fitted_rbbox[1][0] > fitted_rbbox[1][1]:
-                    long_axis, short_axis = fitted_rbbox[1][0], fitted_rbbox[1][1]
+            error = None
+            if "error" in output[0]:
+                error = output[0]
+                error_fns.append(file_name)
+            else:
+                predictions = output[0]["objects"]
+                vis_output: str = output[0]["vis"]
+                if vis_output.startswith("https") or vis_output.startswith("http"):
+                    resp = requests.get(vis_output, timeout=180)
+                    resp.raise_for_status()
+                    predicted_image = np.array(Image.open(io.BytesIO(resp.content)))
                 else:
-                    long_axis, short_axis = fitted_rbbox[1][1], fitted_rbbox[1][0]
-
-                ratio = short_axis / long_axis
-                measurements.append(
-                    (
-                        predicted_image.shape[0],
-                        predicted_image.shape[1],
-                        category,
-                        long_axis,
-                        short_axis,
-                        ratio,
-                        area,
+                    predicted_image = np.array(
+                        Image.open(
+                            io.BytesIO(base64.b64decode(vis_output.split(",")[1]))
+                        )
                     )
-                )
 
-                if process_field is None:
-                    rb = (
-                        (
-                            bbox["left"] + fitted_rbbox[0][0],
-                            bbox["top"] + fitted_rbbox[0][1],
-                        ),
-                        (fitted_rbbox[1][0], fitted_rbbox[1][1]),
-                        fitted_rbbox[2],
+                # post process
+                for idx, pred in enumerate(predictions):
+                    bbox = pred["bounding-box"]
+                    category = pred["category"]
+                    rle = pred["rle"]
+                    score = pred["score"]
+
+                    rle = {
+                        "counts": rle.split(","),
+                        "size": [bbox["height"], bbox["width"]],
+                    }
+
+                    # mask = rle2mask(mask_rle=rle, shape=orig_img.shape[:2])
+                    compressed_rle = cocomask.frPyObjects(
+                        rle, rle.get("size")[0], rle.get("size")[1]
                     )
-                    if category == "stomata":
-                        c = color_1
+                    mask = cocomask.decode(compressed_rle)
+                    polygons = binary_mask_to_polygon(mask)
+                    fitted_rbbox = fit_polygons_to_rotated_bboxes(polygons)
+                    if len(fitted_rbbox) < 1:
+                        continue
+                    fitted_rbbox = fitted_rbbox[0]
+                    area = calc_polygon_area(polygons)
+                    if len(area) < 1:
+                        continue
+                    area = area[0]
+
+                    # Get long and short axis
+                    if fitted_rbbox[1][0] > fitted_rbbox[1][1]:
+                        long_axis, short_axis = fitted_rbbox[1][0], fitted_rbbox[1][1]
                     else:
-                        c = color_2
-                    box = cv2.boxPoints(rb)
-                    box = np.intp(box)
-                    predicted_image = cv2.drawContours(
-                        predicted_image, [box], 0, color=c, thickness=2
+                        long_axis, short_axis = fitted_rbbox[1][1], fitted_rbbox[1][0]
+
+                    ratio = short_axis / long_axis
+                    measurements.append(
+                        (
+                            predicted_image.shape[0],
+                            predicted_image.shape[1],
+                            category,
+                            long_axis,
+                            short_axis,
+                            ratio,
+                            area,
+                        )
                     )
-                    t_size = cv2.getTextSize(
-                        f"idx:{idx}", 0, fontScale=0.5, thickness=1
-                    )[0]
-                    pt = np.amax(box, axis=0)
-                    c1 = (pt[0], pt[1])
-                    c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
-                    cv2.rectangle(
-                        predicted_image,
-                        c1,
-                        c2,
-                        color=c,
-                        thickness=-1,
-                        lineType=cv2.LINE_AA,
-                    )  # filled
-                    cv2.putText(
-                        predicted_image,
-                        f"idx:{idx}",
-                        (c1[0], c1[1] - 2),
-                        0,
-                        0.5,
-                        [255, 255, 255],
-                        thickness=1,
-                        lineType=cv2.LINE_AA,
-                    )
+
+                    if process_field is None:
+                        rb = (
+                            (
+                                bbox["left"] + fitted_rbbox[0][0],
+                                bbox["top"] + fitted_rbbox[0][1],
+                            ),
+                            (fitted_rbbox[1][0], fitted_rbbox[1][1]),
+                            fitted_rbbox[2],
+                        )
+                        if category == "stomata":
+                            c = color_1
+                        else:
+                            c = color_2
+                        box = cv2.boxPoints(rb)
+                        box = np.intp(box)
+                        predicted_image = cv2.drawContours(
+                            predicted_image, [box], 0, color=c, thickness=2
+                        )
+                        t_size = cv2.getTextSize(
+                            f"idx:{idx}", 0, fontScale=0.5, thickness=1
+                        )[0]
+                        pt = np.amax(box, axis=0)
+                        c1 = (pt[0], pt[1])
+                        c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+                        cv2.rectangle(
+                            predicted_image,
+                            c1,
+                            c2,
+                            color=c,
+                            thickness=-1,
+                            lineType=cv2.LINE_AA,
+                        )  # filled
+                        cv2.putText(
+                            predicted_image,
+                            f"idx:{idx}",
+                            (c1[0], c1[1] - 2),
+                            0,
+                            0.5,
+                            [255, 255, 255],
+                            thickness=1,
+                            lineType=cv2.LINE_AA,
+                        )
 
             df = pd.DataFrame(
                 measurements,
@@ -199,15 +210,43 @@ def preprocess_and_render_layout(image_dict, process_field=None):
                     "area",
                 ],
             )
-            dfs.append(df)
 
             if process_field is None:
+                if error is None:
+                    dfs.append(df)
+                    p_images.append(predicted_image)
+                    fn, ext = file_name.rsplit(".", 1)
                 with col1:
                     st.image(orig_img, channels="BGR", caption=file_name)
                 with col2:
-                    st.image(predicted_image, caption=file_name)
+                    if error is None:
+                        st.image(predicted_image, channels="RGB", caption=file_name)
+                        img_bytes = cv2.imencode(f".{ext}", predicted_image)[
+                            1
+                        ].tobytes()
+                        st.download_button(
+                            label="Download Predicted Image",
+                            data=img_bytes,
+                            file_name=f"{fn}_predicted.{ext}",
+                            mime="image/png",
+                            on_click="ignore",
+                        )
+                    else:
+                        st.text_area(
+                            "Error Component in Instill Pipeline:", error["component"]
+                        )
                 with col3:
-                    st.dataframe(df)
+                    if error is None:
+                        st.dataframe(df)
+                        st.download_button(
+                            label="Download CSV",
+                            data=df.to_csv().encode("utf-8"),
+                            file_name=f"{fn}.csv",
+                            mime="text/csv",
+                            on_click="ignore",
+                        )
+                    else:
+                        st.text_area("Error Message:", error["error"])
             else:
                 long_axis_list = [t[2] for t in measurements]
                 short_axis_list = [t[3] for t in measurements]
@@ -244,13 +283,11 @@ def preprocess_and_render_layout(image_dict, process_field=None):
             )
             st.dataframe(df)
         else:
-            res = pd.concat(dfs)
-            st.download_button(
-                label="Download CSV",
-                data=res.to_csv().encode("utf-8"),
-                file_name="all.csv",
-                mime="text/csv",
-            )
+            with st.sidebar:
+                keys = [k for k in outputs.keys() if k not in error_fns]
+                res = pd.concat(dfs, keys=keys)
+                res.index.names = ["filename", "index"]
+                download_modal(res, outputs.keys(), p_images)
 
 
 def video_input():
@@ -344,8 +381,18 @@ def batch_infer_image(images_dict: dict, process_field=None) -> dict:
 
         if operation is not None:
             response_dict = operation["response"]
-            if len(response_dict) > 0 and "outputs" in response_dict:
+            error = None
+            for component, trace in response_dict["metadata"]["traces"].items():
+                if "STATUS_ERROR" in trace["statuses"]:
+                    error = {
+                        "component": component,
+                        "error": trace["error"]["message"],
+                    }
+            # print([json.loads(t.replace("'", "\""))["error"] for t in response_dict["metadata"]["traces"]])
+            if len(response_dict) > 0 and error is None:
                 responses[idx] = response_dict["outputs"]
+            else:
+                responses[idx] = [error]
 
     return responses
 
