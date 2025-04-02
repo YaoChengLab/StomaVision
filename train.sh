@@ -20,17 +20,17 @@ time=$(date +%F_%T)
 
 
 # train stage 1 model
-python seg/segment/train.py \
-    --workers 8 \
-    --device 0 \
-    --batch-size $batch_size \
-    --cfg cfg/training/yolov7-seg.yaml \
-    --data data/stomavision-outerline.yaml \
-    --img 640 \
-    --weights 'model/yolov7-seg.pt' \
-    --name outerline-$time \
-    --hyp hyp/hyp.scratch.abrc.yaml \
-    --epochs 100
+# python seg/segment/train.py \
+#     --workers 8 \
+#     --device 0 \
+#     --batch-size $batch_size \
+#     --cfg cfg/training/yolov7-seg.yaml \
+#     --data data/stomavision-outerline.yaml \
+#     --img 640 \
+#     --weights 'model/yolov7-seg.pt' \
+#     --name outerline-$time \
+#     --hyp hyp/hyp.scratch.abrc.yaml \
+#     --epochs 100
 
 # train stage 2 model
 python seg/segment/train.py \

@@ -2,105 +2,75 @@
 
 ### How to pack your own model weight to be served on [Instill Core](https://github.com/instill-ai/instill-core)
 
-First name your newly trained weight to `model.pt` and move it under the path `deploy/model.pt`, or you can use our pretrained model under the path `/model/model.pt`
+You will need to have `docker` installedYou will need to have `docker` installed. You can read more about how model serving works on Instill Core [here](https://github.com/instill-ai/models?tab=readme-ov-file).
 
-And zip the whole `/deploy` folder
+1. Put your `outerline model` and `pore model` under the path `deploy/` and rename them to be `outerlinebest.pt` and `porebest.pt` respectively, or you can download our pretrained model with
+
 ```bash
-cd deploy
-zip -r "stomavision.zip" .
-mv stomavision.zip ../
-cd ..
+curl -o ./deploy/outerlinebest.pt https://artifacts.instill.tech/model/yolov7-stomata/outerlinebest.pt
+curl -o ./deploy/porebest.pt https://artifacts.instill.tech/model/yolov7-stomata/porebest.pt
 ```
 
-Next clone and launch `Instill Core`, it will automatically deploy Instill Model and Instill VDP for you. You will need to have `docker` installed
+2. Install Instill SDK
+
 ```bash
-git clone -b v0.25.0-beta https://github.com/instill-ai/instill-core.git && cd instill-core
+pip install instill-sdk==0.16.2
+```
+
+3. Build model image
+
+```bash
+instill build admin/stomavision
+```
+
+4. Clone and launch `Instill Core`.
+
+```bash
+git clone -b v0.50.2-beta https://github.com/instill-ai/instill-core.git && cd instill-core
 # Launch all services
 make all
 ```
 
-Now we open a browser and
-1. go to `localhost:3000` and login with default password: `password`
-2. navigate to `Model Hub` page
-3. click `Add Model` button
-4. give the model a name in the `ID` section
-5. select `Local` in the `Model source` drop down menu
-6. select the `stomavision.zip` file we just zipped in the `Upload a file` section
-7. click `Set up`
-8. now we can wait for awhile and refresh the page until we see the model `Status` become `Online`, shouldn't take longer than 1 minute
-9. now the model is served! To verify it, we first need to obtain an API_KEY
-10. click the profile icon at the top right corner and click `Settings`
-11. go to API Tokens tab
-12. click `Create Token`
-13. give it a name and click `Create Token`
-14. click the copy icon to copy the whole token
-15. now in your terminal, replace the `{your_model_name_here}` and `{your_token_here}` and send the request
+5. On your browser go to `localhost:3000` and login with default password: `password`
+6. Go to `Settings` -> `API Tokens` and create a new API token
+7. In terminal, `docker login`
+
 ```bash
-curl --location 'http://localhost:8080/model/v1alpha/users/admin/models/{your_model_name_here}/trigger' \
+docker login localhost:8080
+Username: admin
+Password: {your-api-token}
+```
+
+8. Back on the browser, go to `Model` page and create a new model with
+
+- Model ID: stomavision
+- AI Task: Instance Segmentation
+- Hardware: GPU
+
+9. In terminal, push the model onto instill-core
+
+```bash
+instill push admin/stomavision -u localhost:8080
+```
+
+10. After the model is pushed and the status is `online` on model page, go to pipeline page and create a pipeline with name `stomavision`
+11. Copy and paste the recipe content from [here](utils/pipeline_recipe.yaml) into the editor
+12. Now you can trigger the pipeline with an image to see the result!
+
+Or you can use API to trigger the model like this
+
+```bash
+curl --location 'http://localhost:8080/v1alpha/namespaces/admin/models/stomavision/trigger' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {your_token_here}' \
 --data '{
     "task_inputs": [
         {
-            "instance_segmentation": {
-                "image_url": "https://images.fineartamerica.com/images-medium-large-5/stomata-on-epidermis-of-tulip-leaf-john-durhamscience-photo-library.jpg"
+            "data": {
+                "image-url": "https://microscopyofnature.com/sites/default/files/2022-03/Mais-stomata-ZW10.jpg",
+                "type": "image-url"
             }
         }
     ]
 }'
 ```
-you should get a response like this
-```json
-{
-    "task": "TASK_INSTANCE_SEGMENTATION",
-    "task_outputs": [
-        {
-            "instance_segmentation": {
-                "objects": [
-                    {
-                        "rle": "114,2,6,4,5,4,5,4,5,4,5,4,5,4,6,2,19",
-                        "category": "stomata",
-                        "score": 0.7837403,
-                        "bounding_box": {
-                            "top": 469,
-                            "left": 225,
-                            "width": 22,
-                            "height": 9
-                        }
-                    },
-                    ...
-                    ...
-                    ...
-                ]
-            }
-        }
-    ]
-}
-```
-### How to visualize the inference result with Instill VDP
-Now we have our model served on Instill Core, we can create a pipeline to easily visualize the inference result
-1. go to the `Pipelines` page
-2. click `Create Pipeline` button
-3. give the pipeline a name and choose `Public` or `Private` base on your needs
-4. first we click the `Add Field` button in the `start` component
-5. select `Image`, give it a title and key and click save, they could be the same, you will reference the key later in other component,
-6. we will come back to `end` component later, now click `Add Component` on the top left corner
-7. select `Instill Model` under the `AI` category, this is to create a component that allow the pipeline to connect to the model we just served
-8. click the `Create Connector` within the newly created `Instill Model` component
-9. give it a name and make sure you select `Internal Mode`
-10. now back in the canvas, select `TASK_INSTANCE_SEGMENTATION` in the newly created `Instill Model` component
-11. you should find the model we've created earlier in the `Model Name` dropdown menu, select it
-12. type `${` in the `Image` field, and you will be hinted with the `key` name for our image input from our start component
-13. click `Add Component` again, and select `Image` from `Operators`
-14. select `TASK_DRAW_INSTANCE_SEGMENTATION`
-15. type `${` in the Objects field, and you will be hinted with the output objects from our `Instill Model` component
-16. type `${` in the `Image` field, and you will be hinted with the `key` name for our image input from our start component
-> [!IMPORTANT]  
-> **End operator fields with streamlit app**  
-> If you are going to deploy streamlit app with this pipeline, the end operator must have the following two fields, 1. a field that reference the `instill model` component `output.objects`, and 2. a field that reference the `image` operator `output.image` field. You can define the key name as you like. For more information please refer to [DEPLOY.md](DEPLOY.md)
-17. now we move on to end component, click `Add Field` and give it a `Title` and `Key`, and type `${` in the `Value` field, you will be hinted with some valid options, select the `image` output from our `image` operator, it should be something like `{image_operator_name}.output.image`, and we click save
-18. click `Add Field` and give it a `Title` and `Key`, and type `${` in the `Value` field, you will be hinted with some valid options, select the `objects` output from our `instill model` component, it should be something like `{instill_model_name}.output.objects`, and we click save
-19. click `Save` on the top right bar
-20. if you see all components are linked with solid blue lines, we are ready to trigger the pipeline!
-21. click the `Upload image` in the `start` component and select an image with stomata, click `Run` on the top right bar
-22. now in the `end` component, you will see the visualized output image
