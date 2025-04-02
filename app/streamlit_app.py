@@ -220,7 +220,7 @@ def preprocess_and_render_layout(image_dict, process_field=None):
                     st.image(orig_img, channels="BGR", caption=file_name)
                 with col2:
                     if error is None:
-                        st.image(predicted_image, channels="BGR", caption=file_name)
+                        st.image(predicted_image, channels="RGB", caption=file_name)
                         img_bytes = cv2.imencode(f".{ext}", predicted_image)[
                             1
                         ].tobytes()
