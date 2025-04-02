@@ -7,30 +7,23 @@ component:
       image: ${variable.input}
       objects: ${yolov7-stomata.output.objects}
       showScore: false
-  stomata-vis-operator-bbox:
-    type: image
-    task: TASK_DRAW_DETECTION
-    input:
-      image: ${variable.input}
-      objects: ${yolov7-stomata.output.objects}
-      showScore: false
   yolov7-stomata:
     type: instill-model
     task: TASK_INSTANCE_SEGMENTATION
     input:
       image-base64: ${variable.input}
-      model-name: admin/stomavision
+      model-name: admin/stomavision/latest
 variable:
   input:
     title: Input
     description: Upload the Stomata Image
     type: image
 output:
-  vis-v2-bbox:
-    title: V2 visualization bbox
-    value: ${stomata-vis-operator-bbox.output.image}
-    instill-ui-order: 2
-  vis-v2-seg:
-    title: V2 visualization seg
+  objects:
+    title: Detection objects
+    value: ${yolov7-stomata.output.objects}
+    instill-ui-order: 0
+  vis:
+    title: V2 visualization segmentation
     value: ${stomata-vis-operator-seg.output.image}
-    instill-ui-order: 3
+    instill-ui-order: 1

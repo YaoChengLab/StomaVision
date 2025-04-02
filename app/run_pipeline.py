@@ -32,7 +32,9 @@ def run_stomata_detection(api_token, input, org_uid=None):
     payload = {"inputs": [{"input": input}]}
 
     # Make the POST request
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(
+        url, headers=headers, data=json.dumps(payload), timeout=600
+    )
 
     # Check if the request was successful
     if response.status_code == 200:
@@ -77,7 +79,9 @@ def run_stomata_detection_async(api_token, input, org_uid=None):
     payload = {"inputs": [{"input": input}]}
 
     # Make the POST request
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(
+        url, headers=headers, data=json.dumps(payload), timeout=600
+    )
 
     # Check if the request was successful
     if response.status_code == 200:
@@ -118,7 +122,7 @@ def get_operation(api_token, op_name, org_uid=None):
     url = f"http://localhost:8080/v1beta/{op_name}"
 
     # Make the POST request
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=60)
 
     # Check if the request was successful
     if response.status_code == 200:
