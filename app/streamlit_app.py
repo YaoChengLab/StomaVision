@@ -77,6 +77,7 @@ def preprocess_and_render_layout(image_dict, process_field=None):
             col1.header("Original image")
             col2.header("Image with prediction")
             col3.header("Stomata prediction metrics")
+            dfs = []
         else:
             process_field.text("Average measurements per frame")
             t_measurements = []
@@ -198,6 +199,7 @@ def preprocess_and_render_layout(image_dict, process_field=None):
                     "area",
                 ],
             )
+            dfs.append(df)
 
             if process_field is None:
                 with col1:
@@ -241,6 +243,14 @@ def preprocess_and_render_layout(image_dict, process_field=None):
                 ],
             )
             st.dataframe(df)
+        else:
+            res = pd.concat(dfs)
+            st.download_button(
+                label="Download CSV",
+                data=res.to_csv().encode("utf-8"),
+                file_name="all.csv",
+                mime="text/csv",
+            )
 
 
 def video_input():
