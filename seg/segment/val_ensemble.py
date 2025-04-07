@@ -40,7 +40,7 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 import torch.nn.functional as F
-
+import matplotlib.pyplot as plt
 from models.common import DetectMultiBackend
 from models.yolo import SegmentationModel
 from utils.callbacks import Callbacks
@@ -76,6 +76,13 @@ from utils.segment.metrics import Metrics, ap_per_class_box_and_mask
 from utils.segment.plots import plot_images_and_masks
 from utils.torch_utils import de_parallel, select_device, smart_inference_mode
 from utils.augmentations import letterbox_tensor
+
+from helper import (
+    binary_mask_to_polygon,
+    fit_polygons_to_rotated_bboxes,
+    calc_polygon_area,
+    create_plot,
+)
 
 
 def save_one_txt(predn, save_conf, shape, file):
@@ -118,7 +125,14 @@ def save_one_json(predn, jdict, path, class_map, pred_masks):
 
 
 def process_batch(
-    detections, labels, iouv, pred_masks=None, gt_masks=None, overlap=False, masks=False
+    detections,
+    labels,
+    iouv,
+    pred_masks=None,
+    gt_masks=None,
+    overlap=False,
+    masks=False,
+    plot_dict=None,
 ):
     """
     Return correct prediction matrix
@@ -146,6 +160,37 @@ def process_batch(
             gt_masks.view(gt_masks.shape[0], -1),
             pred_masks.view(pred_masks.shape[0], -1),
         )
+
+        if plot_dict is not None:
+            iiou = torch.permute(iou, (1, 0))
+            max_iou_values, max_iou_indices = torch.max(iiou, dim=0)
+
+            for i, pred_index in enumerate(max_iou_indices):
+                gt_mask = gt_masks[i].cpu().numpy()
+                pred_mask = pred_masks[pred_index].cpu().numpy()
+
+                gt_polygons = binary_mask_to_polygon(gt_mask)
+                pred_polygons = binary_mask_to_polygon(pred_mask)
+
+                gt_area = calc_polygon_area(gt_polygons)[0]
+                pred_area = calc_polygon_area(pred_polygons)[0]
+
+                _, (gt_w, gt_h), _ = fit_polygons_to_rotated_bboxes(gt_polygons)[0]
+                _, (pred_w, pred_h), _ = fit_polygons_to_rotated_bboxes(pred_polygons)[
+                    0
+                ]
+
+                if pred_w <= 120:
+                    plot_dict["g_w"].append(gt_w)
+                    plot_dict["p_w"].append(pred_w)
+                if pred_h <= 120:
+                    plot_dict["g_h"].append(gt_h)
+                    plot_dict["p_h"].append(pred_h)
+                    plot_dict["g_wh"].append(gt_w / gt_h)
+                    plot_dict["p_wh"].append(pred_w / pred_h)
+                if pred_area <= 10000:
+                    plot_dict["g_area"].append(gt_area)
+                    plot_dict["p_area"].append(pred_area)
     else:  # boxes
         iou = box_iou(labels[:, 1:], detections[:, :4])
 
@@ -326,6 +371,16 @@ def run(
     pbar = tqdm(
         dataloader, desc=s, bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"
     )  # progress bar
+    plot_dict = {
+        "g_w": [],
+        "p_w": [],
+        "g_h": [],
+        "p_h": [],
+        "g_wh": [],
+        "p_wh": [],
+        "g_area": [],
+        "p_area": [],
+    }
     for batch_i, (im, targets, paths, shapes, masks) in enumerate(pbar):
         # plot stage 2
         plot_stage_2_list = []
@@ -544,6 +599,7 @@ def run(
                     gt_masks,
                     overlap=overlap,
                     masks=True,
+                    plot_dict=plot_dict,
                 )
                 if plots:
                     confusion_matrix.process_batch(final_predn, labelsn)
@@ -616,6 +672,40 @@ def run(
             )  # pred
 
         # callbacks.run('on_val_batch_end')
+
+    os.makedirs("plot", exist_ok=True)
+    create_plot(
+        plot_dict["p_w"],
+        plot_dict["g_w"],
+        "Stomata Width",
+        "Stomata width from StomaVision",
+        "Stomata width from human label",
+        "plot/width.png",
+    )
+    create_plot(
+        plot_dict["p_h"],
+        plot_dict["g_h"],
+        "Stomata Height",
+        "Stomata width from StomaVision",
+        "Stomata width from human label",
+        "plot/height.png",
+    )
+    create_plot(
+        plot_dict["p_wh"],
+        plot_dict["g_wh"],
+        "Stomata Ratio",
+        "Stomata width from StomaVision",
+        "Stomata width from human label",
+        "plot/ratio.png",
+    )
+    create_plot(
+        plot_dict["p_area"],
+        plot_dict["g_area"],
+        "Stomata Area",
+        "Stomata width from StomaVision",
+        "Stomata width from human label",
+        "plot/area.png",
+    )
 
     # Compute metrics
     stats = [torch.cat(x, 0).cpu().numpy() for x in zip(*stats)]  # to numpy
