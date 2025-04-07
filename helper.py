@@ -1,10 +1,11 @@
 # import some common libraries
+import torch
 import numpy as np
-from skimage import measure
 import cv2, random
+import matplotlib.pyplot as plt
+from skimage import measure
 from kornia.morphology import dilation
 from kornia.morphology import erosion
-import torch
 from cv2 import MORPH_ELLIPSE, MORPH_RECT
 
 random.seed(0)
@@ -251,3 +252,38 @@ def calc_polygon_area(polygons):
         areas.append(area)
 
     return areas
+
+
+def add_metrics(ax, x, y, y_pred):
+    residuals = y - y_pred
+    n = len(y)
+    p = 1
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((y - np.mean(y)) ** 2)
+    r2 = 1 - ss_res / ss_tot
+    adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+    rmse = np.sqrt(np.mean(residuals**2))
+    bias = np.mean(y_pred - y)
+
+    textstr = f"$R^2$ adj: {adj_r2:.3f}\nRMSE: {rmse:.3f}\nBias: {bias:.3f}"
+    return textstr
+
+
+def create_plot(x, y, title, xlabel, ylabel, filename):
+    fig, ax = plt.subplots()
+    ax.scatter(x, y, marker=".", linewidths=0.1, c="#000000")
+    m, b = np.polyfit(x, y, deg=1)
+    y_pred = m * np.array(x) + b
+    ax.plot(x, y_pred, c="#104675")
+    text = add_metrics(ax, x, y, y_pred)
+    ax.text(
+        min(x),
+        max(y),
+        text,
+        ha="left",
+        va="top",
+    )
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    fig.savefig(filename)
