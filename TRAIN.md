@@ -168,7 +168,7 @@ python seg/segment/val.py \
 --name $model-$data
 ```
 
-We also provide a script `val.sh` for users to evaluate their models on different datasets.
+We also provide a script `val.sh` for users to evaluate their models on different datasets. This will produce some metric plots under `plot` folder.
 
 ## Step 8. Inference
 
