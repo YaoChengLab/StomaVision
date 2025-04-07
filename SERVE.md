@@ -18,8 +18,16 @@ pip install instill-sdk==0.16.2
 ```
 
 3. Build model image
-
+  - for system with NVIDIA GPU
 ```bash
+cd deploy
+instill build admin/stomavision
+```
+  - for CPU system
+```bash
+cd deploy
+mv instill-cpu.yaml instill.yaml
+mv model-cpu.py model.py
 instill build admin/stomavision
 ```
 
