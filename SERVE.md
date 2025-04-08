@@ -53,7 +53,9 @@ Password: {your-api-token}
 
 - Model ID: stomavision
 - AI Task: Instance Segmentation
-- Hardware: GPU
+- Hardware:
+  - GPU if your host machine has NVIDIA GPU
+  - CPU if your host machine doe not have NVIDIA GPU
 
 9. In terminal, push the model onto instill-core
 

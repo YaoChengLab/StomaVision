@@ -74,6 +74,7 @@ def preprocess_and_render_layout(image_dict, process_field=None):
         color_2 = random_color()
 
         # visualize
+        error_fns = []
         if process_field is None:
             col1, col2, col3 = st.columns(3)
             col1.header("Original image")
@@ -81,7 +82,6 @@ def preprocess_and_render_layout(image_dict, process_field=None):
             col3.header("Stomata prediction metrics")
             dfs = []
             p_images = []
-            error_fns = []
         else:
             process_field.text("Average measurements per frame")
             t_measurements = []
@@ -99,6 +99,7 @@ def preprocess_and_render_layout(image_dict, process_field=None):
                 predictions = output[0]["objects"]
                 vis_output: str = output[0]["vis"]
                 if vis_output.startswith("https") or vis_output.startswith("http"):
+                    vis_output = vis_output.replace("localhost", "api-gateway")
                     resp = requests.get(vis_output, timeout=180)
                     resp.raise_for_status()
                     predicted_image = np.array(Image.open(io.BytesIO(resp.content)))

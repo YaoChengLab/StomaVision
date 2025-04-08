@@ -26,7 +26,7 @@ def run_stomata_detection(api_token, input, org_uid=None):
     if org_uid:
         headers["Instill-Requester-Uid"] = org_uid
 
-    url = "http://localhost:8080/v1beta/users/admin/pipelines/stomavision/trigger"
+    url = "http://api-gateway:8080/v1beta/users/admin/pipelines/stomavision/trigger"
 
     # Define the payload
     payload = {"inputs": [{"input": input}]}
@@ -73,7 +73,7 @@ def run_stomata_detection_async(api_token, input, org_uid=None):
     if org_uid:
         headers["Instill-Requester-Uid"] = org_uid
 
-    url = "http://localhost:8080/v1beta/users/admin/pipelines/stomavision/triggerAsync"
+    url = "http://api-gateway:8080/v1beta/users/admin/pipelines/stomavision/triggerAsync"
 
     # Define the payload
     payload = {"inputs": [{"input": input}]}
@@ -119,7 +119,7 @@ def get_operation(api_token, op_name, org_uid=None):
     if org_uid:
         headers["Instill-Requester-Uid"] = org_uid
 
-    url = f"http://localhost:8080/v1beta/{op_name}"
+    url = f"http://api-gateway:8080/v1beta/{op_name}"
 
     # Make the POST request
     response = requests.get(url, headers=headers, timeout=60)
