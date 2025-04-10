@@ -57,4 +57,4 @@ You can also fine-tune and serve your own stomata detection model, please refer 
 
 <a id="publication"></a>
 # Citation
-Ting-Li Wu, Po-Yu Chen, Xiaofei Du, Heiru Wu, Jheng-Yang Ou, Po-Xing Zheng, Yu-Lin Wu, Ruei-Shiuan Wang, Te-Chang Hsu, Chen-Yu Lin, Wei-Yang Lin,  Ping-Lin Chang, Chin-Min Kimmy Ho, Yao-Cheng Lin. StomaVision: stomatal trait analysis through deep learning
+[Ting-Li Wu, Po-Yu Chen, Xiaofei Du, Heiru Wu, Jheng-Yang Ou, Po-Xing Zheng, Yu-Lin Wu, Ruei-Shiuan Wang, Te-Chang Hsu, Chen-Yu Lin, Wei-Yang Lin,  Ping-Lin Chang, Chin-Min Kimmy Ho, Yao-Cheng Lin. StomaVision: stomatal trait analysis through deep learning](https://doi.org/10.1101/2024.04.24.590919)
