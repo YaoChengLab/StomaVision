@@ -1,8 +1,8 @@
-## Serving StomaVision on [Instill Core](https://github.com/instill-ai/instill-core)
+# Serving StomaVision on [Instill Core](https://github.com/instill-ai/instill-core)
 
-### How to pack your own model weight to be served on [Instill Core](https://github.com/instill-ai/instill-core)
+## How to pack your own model weight to be served on [Instill Core](https://github.com/instill-ai/instill-core)
 
-You will need to have `docker` installedYou will need to have `docker` installed. You can read more about how model serving works on Instill Core [here](https://github.com/instill-ai/models?tab=readme-ov-file).
+You will need to have `docker` installed. You can read more about how model serving works on Instill Core [here](https://github.com/instill-ai/models?tab=readme-ov-file).
 
 1. Put your `outerline model` and `pore model` under the path `deploy/` and rename them to be `outerlinebest.pt` and `porebest.pt` respectively, or you can download our pretrained model with
 
