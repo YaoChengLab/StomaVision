@@ -7,8 +7,8 @@ You will need to have `docker` installed. You can read more about how model serv
 1. Put your `outerline model` and `pore model` under the path `deploy/` and rename them to be `outerlinebest.pt` and `porebest.pt` respectively, or you can download our pretrained model with
 
 ```bash
-curl -o ./deploy/outerlinebest.pt https://artifacts.instill.tech/model/yolov7-stomata/outerlinebest.pt
-curl -o ./deploy/porebest.pt https://artifacts.instill.tech/model/yolov7-stomata/porebest.pt
+curl -o ./deploy/outerlinebest.pt https://artifacts.instill-ai.com/model/yolov7-stomata/outerlinebest.pt
+curl -o ./deploy/porebest.pt https://artifacts.instill-ai.com/model/yolov7-stomata/porebest.pt
 ```
 
 2. Install Instill SDK
